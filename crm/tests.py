@@ -1,3 +1,8 @@
+"""Tests for the CRM application."""
 from django.test import TestCase
 
-# Create your tests here.
+
+class CrmTests(TestCase):
+    """Placeholder tests."""
+    def test_placeholder(self):
+        """Ensure test runner works."""

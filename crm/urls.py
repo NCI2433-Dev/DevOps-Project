@@ -20,7 +20,7 @@ urlpatterns = [
          views.quote_request_success, name='quote_request_success'),
 
     # Authenticated user views
-    path('my-orders/', views.my_orders, name='my_orders'), 
+    path('my-orders/', views.my_orders, name='my_orders'),
     # Sales dashboard
     path('sales/', views.sales_dashboard, name='sales_dashboard'),
 

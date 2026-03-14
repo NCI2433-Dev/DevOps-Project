@@ -2,8 +2,8 @@
 import re
 
 from django import forms
+from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.forms import inlineformset_factory
 from django.utils import timezone
@@ -34,6 +34,9 @@ class RequestQuoteForm(forms.ModelForm):
         if not email:
             raise ValidationError("Email is required.")
         return email
+
+
+User = get_user_model()
 
 
 class RegistrationForm(UserCreationForm):  # pylint: disable=too-many-ancestors
