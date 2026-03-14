@@ -1,7 +1,7 @@
+"""Database models for the CRM application."""
 from django.db import models
 from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
-import uuid
 
 
 def generate_lead_reference():
@@ -26,13 +26,18 @@ class Product(models.Model):
     """Sellable products"""
     name = models.CharField(max_length=200, unique=True)
     sku = models.CharField(max_length=50, unique=True)
-    base_price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
+    base_price = models.DecimalField(
+        max_digits=10, decimal_places=2, validators=[MinValueValidator(0)]
+    )
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    objects = models.Manager()
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Metadata for Product model."""
         ordering = ['name']
 
     def __str__(self):
@@ -48,7 +53,7 @@ class Lead(models.Model):
         ('Converted', 'Converted'),
         ('Rejected', 'Rejected'),
     ]
-    
+
     SOURCE_CHOICES = [
         ('Web Form', 'Web Form'),
         ('Email', 'Email'),
@@ -56,13 +61,17 @@ class Lead(models.Model):
         ('Referral', 'Referral'),
     ]
 
-    reference_number = models.CharField(max_length=20, unique=True, default=generate_lead_reference)
+    reference_number = models.CharField(
+        max_length=20, unique=True, default=generate_lead_reference
+    )
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField()
     phone = models.CharField(max_length=20)
     company_name = models.CharField(max_length=150)
-    product_interested = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True)
+    product_interested = models.ForeignKey(
+        Product, on_delete=models.SET_NULL, null=True, blank=True
+    )
     quantity = models.IntegerField(null=True, blank=True, validators=[MinValueValidator(1)])
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='New')
     source = models.CharField(max_length=20, choices=SOURCE_CHOICES, default='Web Form')
@@ -73,7 +82,10 @@ class Lead(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    objects = models.Manager()
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Metadata for Lead model."""
         ordering = ['-created_at']
 
     def __str__(self):
@@ -91,11 +103,14 @@ class Account(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    objects = models.Manager()
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Metadata for Account model."""
         ordering = ['company_name']
 
     def __str__(self):
-        return self.company_name
+        return str(self.company_name)
 
 
 class Opportunity(models.Model):
@@ -104,7 +119,7 @@ class Opportunity(models.Model):
         ('Open', 'Open'),
         ('Closed', 'Closed'),
     ]
-    
+
     STAGE_CHOICES = [
         ('Qualification', 'Qualification'),
         ('Proposal', 'Proposal'),
@@ -121,11 +136,14 @@ class Opportunity(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    objects = models.Manager()
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Metadata for Opportunity model."""
         ordering = ['-created_at']
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class Quote(models.Model):
@@ -148,7 +166,10 @@ class Quote(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    objects = models.Manager()
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Metadata for Quote model."""
         ordering = ['-created_at']
 
     def __str__(self):
@@ -156,7 +177,7 @@ class Quote(models.Model):
 
     def get_subtotal(self):
         """Calculate subtotal from line items"""
-        items = self.line_items.all()
+        items = self.line_items.all()  # pylint: disable=no-member
         total = sum(item.get_line_total() for item in items)
         return round(total, 2)
 
@@ -182,7 +203,9 @@ class QuoteLineItem(models.Model):
     quote = models.ForeignKey(Quote, on_delete=models.CASCADE, related_name='line_items')
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     quantity = models.IntegerField(validators=[MinValueValidator(1)])
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
+    unit_price = models.DecimalField(
+        max_digits=10, decimal_places=2, validators=[MinValueValidator(0)]
+    )
     discount = models.DecimalField(
         max_digits=5, decimal_places=2, default=0,
         validators=[MinValueValidator(0), MaxValueValidator(100)]
@@ -190,7 +213,10 @@ class QuoteLineItem(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    objects = models.Manager()
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Metadata for QuoteLineItem model."""
         ordering = ['created_at']
 
     def __str__(self):
@@ -201,4 +227,3 @@ class QuoteLineItem(models.Model):
         base_total = self.unit_price * self.quantity
         discount_amount = base_total * (self.discount / 100)
         return round(base_total - discount_amount, 2)
-
