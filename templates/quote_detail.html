@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}{{ quote.number }} - CRM CPQ{% endblock %}
+
+{% block content %}
+<div style="width: 95%; max-width: 1000px; margin: 20px auto;">
+    <div class="card">
+        <div class="card-header">
+            <h1>Quote {{ quote.number }}</h1>
+            <p style="font-size: 14px; color: #7f8c8d; margin: 0;">
+                Opportunity: <strong>{{ quote.opportunity.name }}</strong>
+            </p>
+        </div>
+        
+        <div class="card-body detail-items">
+            <div class="detail-item">
+                <span class="label">Opportunity Account:</span>
+                <span class="value">{{ quote.opportunity.account.company_name }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Contact:</span>
+                <span class="value">{{ quote.opportunity.account.contact_person_name }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Email:</span>
+                <span class="value">{{ quote.opportunity.account.email }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Status:</span>
+                <span class="value"><span class="badge badge-{{ quote.status|lower }}">{{ quote.status }}</span></span>
+            </div>
+            {% if quote.notes %}
+                <div class="detail-item">
+                    <span class="label">Notes:</span>
+                    <span class="value">{{ quote.notes }}</span>
+                </div>
+            {% endif %}
+            <div class="detail-item">
+                <span class="label">Created:</span>
+                <span class="value">{{ quote.created_at|date:"M d, Y H:i" }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card" style="margin-top: 20px;">
+        <div class="card-header">
+            <h2>Line Items</h2>
+        </div>
+        <div class="card-body">
+            {% if quote.quotelineitem_set.all %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>SKU</th>
+                            <th>Unit Price</th>
+                            <th>Quantity</th>
+                            <th>Discount (%)</th>
+                            <th>Line Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for line in quote.quotelineitem_set.all %}
+                            <tr>
+                                <td>{{ line.product.name }}</td>
+                                <td>{{ line.product.sku }}</td>
+                                <td>${{ line.unit_price|floatformat:2 }}</td>
+                                <td>{{ line.quantity }}</td>
+                                <td>{{ line.discount }}%</td>
+                                <td>${{ line.get_line_total|floatformat:2 }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No line items in this quote.</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="card" style="margin-top: 20px;">
+        <div class="card-body">
+            <div style="display: flex; justify-content: flex-end;">
+                <div style="width: 300px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #ecf0f1;">
+                        <span>Subtotal:</span>
+                        <span>${{ quote.get_subtotal|floatformat:2 }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #ecf0f1;">
+                        <span>Discount ({{ quote.discount }}%):</span>
+                        <span>${{ quote.get_discount_amount|floatformat:2 }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; color: #2c3e50; padding: 10px 0;">
+                        <span>Total:</span>
+                        <span>${{ quote.get_total|floatformat:2 }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="btn-group" style="margin-top: 20px; justify-content: center;">
+        {% if quote.status == 'Draft' %}
+            <a href="{% url 'quote_update' quote.id %}" class="btn btn-warning">Edit</a>
+            <a href="{% url 'quote_delete' quote.id %}" class="btn btn-danger">Delete</a>
+            <form method="post" action="{% url 'quote_update_status' quote.id %}" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="Submitted">
+                <button type="submit" class="btn btn-success">Submit</button>
+            </form>
+        {% elif quote.status == 'Submitted' %}
+            <form method="post" action="{% url 'quote_update_status' quote.id %}" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="Approved">
+                <button type="submit" class="btn btn-success">Approve</button>
+            </form>
+            <form method="post" action="{% url 'quote_update_status' quote.id %}" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="Rejected">
+                <button type="submit" class="btn btn-danger">Reject</button>
+            </form>
+        {% endif %}
+        <a href="{% url 'quote_list' %}" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>
+{% endblock %}

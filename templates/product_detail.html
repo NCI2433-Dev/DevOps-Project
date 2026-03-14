@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} - Product Details{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>{{ product.name }}</h1>
+    </div>
+    <div class="card-body">
+        <div class="product-details">
+            <div class="detail-row">
+                <label>SKU:</label>
+                <span>{{ product.sku }}</span>
+            </div>
+            
+            <div class="detail-row">
+                <label>Base Price:</label>
+                <span>${{ product.base_price }}</span>
+            </div>
+            
+            <div class="detail-row">
+                <label>Description:</label>
+                <span>{{ product.description }}</span>
+            </div>
+            
+            <div class="detail-row">
+                <label>Status:</label>
+                <span>{% if product.is_active %}Active{% else %}Inactive{% endif %}</span>
+            </div>
+            
+            <div class="detail-row">
+                <label>Created:</label>
+                <span>{{ product.created_at|date:"M d, Y" }}</span>
+            </div>
+        </div>
+        
+        <div class="action-buttons" style="margin-top: 30px;">
+            <a href="{% url 'request_quote' %}?product_id={{ product.id }}" class="btn btn-success">
+                Request Quote for this Product
+            </a>
+            <a href="{% url 'product_list' %}" class="btn btn-secondary">
+                Back to Products
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

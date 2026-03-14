@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Product Catalog - CRM CPQ{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>Product Catalog</h1>
+    </div>
+    <div class="card-body">
+        {% if products %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>SKU</th>
+                        <th>Base Price</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                        <tr>
+                            <td>{{ product.name }}</td>
+                            <td>{{ product.sku }}</td>
+                            <td>${{ product.base_price }}</td>
+                            <td>{{ product.description|truncatewords:20 }}</td>
+                            <td class="table-actions">
+                                <a href="{% url 'request_quote' %}?product_id={{ product.id }}" class="btn btn-success">
+                                    Request
+                                </a>
+                            </td>
+                            <td class="table-actions">
+                                <a href="{% url 'product_detail' product.id %}" class="btn btn-success">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No products available.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

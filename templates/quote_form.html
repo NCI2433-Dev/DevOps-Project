@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} - CRM CPQ{% endblock %}
+
+{% block content %}
+<div style="width: 95%; max-width: 1000px; margin: 20px auto;">
+    <div class="card">
+        <div class="card-header">
+            <h1>{{ title }}</h1>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors }}</div>{% endif %}
+                
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;">
+                        <label for="{{ form.opportunity.id_for_label }}">{{ form.opportunity.label }}</label>
+                        {{ form.opportunity }}
+                        {% if form.opportunity.errors %}<span style="color: #e74c3c;">{{ form.opportunity.errors.0 }}</span>{% endif %}
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="{{ form.discount.id_for_label }}">{{ form.discount.label }} (%)</label>
+                        {{ form.discount }}
+                        {% if form.discount.errors %}<span style="color: #e74c3c;">{{ form.discount.errors.0 }}</span>{% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
+                    {{ form.notes }}
+                    {% if form.notes.errors %}<span style="color: #e74c3c;">{{ form.notes.errors.0 }}</span>{% endif %}
+                </div>
+                
+                <h3 style="margin-top: 30px;">Quote Line Items</h3>
+                {% if formset.non_form_errors %}<div class="alert alert-error">{{ formset.non_form_errors }}</div>{% endif %}
+                
+                <table style="width: 100%; margin-bottom: 20px;">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Unit Price</th>
+                            <th>Quantity</th>
+                            <th>Discount (%)</th>
+                            <th>Line Total</th>
+                            <th>Remove</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for form_item in formset %}
+                            <tr>
+                                <td>
+                                    {{ form_item.product }}
+                                    {% if form_item.product.errors %}<span style="color: #e74c3c; font-size: 12px;">{{ form_item.product.errors.0 }}</span>{% endif %}
+                                </td>
+                                <td>
+                                    <span id="unit-price-{{ forloop.counter0 }}">${{ form_item.product.value|default:"0.00" }}</span>
+                                </td>
+                                <td>
+                                    {{ form_item.quantity }}
+                                    {% if form_item.quantity.errors %}<span style="color: #e74c3c; font-size: 12px;">{{ form_item.quantity.errors.0 }}</span>{% endif %}
+                                </td>
+                                <td>
+                                    {{ form_item.discount }}
+                                    {% if form_item.discount.errors %}<span style="color: #e74c3c; font-size: 12px;">{{ form_item.discount.errors.0 }}</span>{% endif %}
+                                </td>
+                                <td>
+                                    <span id="line-total-{{ forloop.counter0 }}">$0.00</span>
+                                </td>
+                                <td>
+                                    {{ form_item.DELETE }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                {{ formset.management_form }}
+                
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-success">Save Quote</button>
+                    {% if form.instance.pk %}
+                        <a href="{% url 'quote_detail' form.instance.id %}" class="btn btn-secondary">Cancel</a>
+                    {% else %}
+                        <a href="{% url 'quote_list' %}" class="btn btn-secondary">Cancel</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

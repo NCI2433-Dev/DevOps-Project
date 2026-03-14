@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Sales Dashboard - CRM CPQ{% endblock %}
+
+{% block content %}
+<h1>Sales Dashboard</h1>
+
+<div class="stats-grid">
+    <div class="stat-box success">
+        <div class="stat-number">{{ leads_converted }}</div>
+        <div class="stat-label">Converted Leads</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-number">{{ leads_new }}</div>
+        <div class="stat-label">New Leads</div>
+    </div>
+    <div class="stat-box warning">
+        <div class="stat-number">{{ leads_qualified }}</div>
+        <div class="stat-label">Qualified Leads</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-number">{{ opportunities_open }}</div>
+        <div class="stat-label">Open Opportunities</div>
+    </div>
+    <div class="stat-box danger">
+        <div class="stat-number">{{ quotes_draft }}</div>
+        <div class="stat-label">Draft Quotes</div>
+    </div>
+    <div class="stat-box success">
+        <div class="stat-number">{{ quotes_approved }}</div>
+        <div class="stat-label">Approved Quotes</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2>Recent Quotes</h2>
+    </div>
+    <div class="card-body">
+        {% if recent_quotes %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Quote Number</th>
+                        <th>Opportunity</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for quote in recent_quotes %}
+                        <tr>
+                            <td>{{ quote.number }}</td>
+                            <td>{{ quote.opportunity.name }}</td>
+                            <td><span class="badge badge-{{ quote.status|lower }}">{{ quote.status }}</span></td>
+                            <td>{{ quote.created_at|date:"M d, Y" }}</td>
+                            <td class="table-actions">
+                                <a href="{% url 'quote_detail' quote.id %}" class="action-view">View</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No quotes yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="btn-group" style="justify-content: center; margin-top: 30px;">
+    <a href="{% url 'lead_list' %}" class="btn btn-primary">Manage Leads</a>
+    <a href="{% url 'opportunity_list' %}" class="btn btn-primary">Manage Opportunities</a>
+    <a href="{% url 'quote_list' %}" class="btn btn-primary">Manage Quotes</a>
+</div>
+{% endblock %}

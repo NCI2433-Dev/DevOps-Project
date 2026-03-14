@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} - CRM CPQ{% endblock %}
+
+{% block content %}
+<div style="max-width: 700px; margin: 20px auto;">
+    <div class="card">
+        <div class="card-header">
+            <h1>{{ title }}</h1>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors }}</div>{% endif %}
+                
+                <div class="form-group">
+                    <label for="{{ form.account.id_for_label }}">{{ form.account.label }}</label>
+                    {{ form.account }}
+                    {% if form.account.errors %}<span style="color: #e74c3c;">{{ form.account.errors.0 }}</span>{% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}<span style="color: #e74c3c;">{{ form.name.errors.0 }}</span>{% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}<span style="color: #e74c3c;">{{ form.description.errors.0 }}</span>{% endif %}
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.stage.id_for_label }}">{{ form.stage.label }}</label>
+                        {{ form.stage }}
+                        {% if form.stage.errors %}<span style="color: #e74c3c;">{{ form.stage.errors.0 }}</span>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.status.id_for_label }}">{{ form.status.label }}</label>
+                        {{ form.status }}
+                        {% if form.status.errors %}<span style="color: #e74c3c;">{{ form.status.errors.0 }}</span>{% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.expected_close_date.id_for_label }}">{{ form.expected_close_date.label }}</label>
+                    {{ form.expected_close_date }}
+                    {% if form.expected_close_date.errors %}<span style="color: #e74c3c;">{{ form.expected_close_date.errors.0 }}</span>{% endif %}
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-success">Save</button>
+                    {% if form.instance.pk %}
+                        <a href="{% url 'opportunity_detail' form.instance.id %}" class="btn btn-secondary">Cancel</a>
+                    {% else %}
+                        <a href="{% url 'opportunity_list' %}" class="btn btn-secondary">Cancel</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Lead Details - CRM CPQ{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>Lead: {{ lead.reference_number }}</h1>
+    </div>
+    
+    <div class="card-body">
+        <div class="detail-item">
+            <div class="detail-label">Reference Number</div>
+            <div class="detail-value">{{ lead.reference_number }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Name</div>
+            <div class="detail-value">{{ lead.first_name }} {{ lead.last_name }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Email</div>
+            <div class="detail-value">{{ lead.email }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Phone</div>
+            <div class="detail-value">{{ lead.phone }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Company</div>
+            <div class="detail-value">{{ lead.company_name }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Status</div>
+            <div class="detail-value"><span class="badge badge-{{ lead.status|lower }}">{{ lead.status }}</span></div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Source</div>
+            <div class="detail-value">{{ lead.source }}</div>
+        </div>
+        {% if lead.notes %}
+            <div class="detail-item">
+                <div class="detail-label">Notes</div>
+                <div class="detail-value">{{ lead.notes|linebreaks }}</div>
+            </div>
+        {% endif %}
+        <div class="detail-item">
+            <div class="detail-label">Created</div>
+            <div class="detail-value">{{ lead.created_at|date:"M d, Y H:i" }}</div>
+        </div>
+        {% if lead.converted_to_acct_id %}
+            <div class="detail-item">
+                <div class="detail-label">Converted to Account</div>
+                <div class="detail-value">
+                    <a href="{% url 'opportunity_list' %}">{{ lead.converted_to_acct_id.company_name }}</a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="card-footer">
+        <div class="btn-group">
+            <a href="{% url 'lead_update' lead.id %}" class="btn btn-warning">Edit</a>
+            {% if lead.status != 'Converted' and lead.status != 'Rejected' %}
+                <a href="{% url 'lead_convert' lead.id %}" class="btn btn-success">Convert to Opportunity</a>
+            {% endif %}
+            <a href="{% url 'lead_delete' lead.id %}" class="btn btn-danger">Delete/Reject</a>
+            <a href="{% url 'lead_list' %}" class="btn btn-secondary">Back to List</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

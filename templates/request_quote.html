@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Request Quote - CRM CPQ{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 20px auto;">
+    <div class="card">
+
+        <div class="card-header">
+            <h1>Request a Quote</h1>
+            <p style="color:#666; font-size:14px;">
+                Fill the form below and our sales team will contact you.
+            </p>
+        </div>
+
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-error">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+  
+            {% if user.is_authenticated %}
+                <div class="form-group">
+                    <label for="{{ form.product_interested.id_for_label }}">{{ form.product_interested.label }}</label>
+                    {{ form.product_interested }}
+                    {% if form.product_interested.errors %}
+                        <span style="color:#e74c3c; font-size:12px;">
+                            {{ form.product_interested.errors.0 }}
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.quantity.id_for_label }}">{{ form.quantity.label }}</label>
+                    {{ form.quantity }}
+                    {% if form.quantity.errors %}
+                        <span style="color:#e74c3c; font-size:12px;">
+                            {{ form.quantity.errors.0 }}
+                        </span>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="form-group">
+                    <label for="{{ form.product_interested.id_for_label }}">{{ form.product_interested.label }}</label>
+                    {{ form.product_interested }}
+                    {% if form.product_interested.errors %}
+                        <span style="color:#e74c3c; font-size:12px;">
+                            {{ form.product_interested.errors.0 }}
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.quantity.id_for_label }}">{{ form.quantity.label }}</label>
+                    {{ form.quantity }}
+                    {% if form.quantity.errors %}
+                        <span style="color:#e74c3c; font-size:12px;">
+                            {{ form.quantity.errors.0 }}
+                        </span>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">{{ form.email.label}}</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <span style="color:#e74c3c; font-size:12px;">
+                            {{ form.email.errors.0 }}
+                        </span>
+                    {% endif %}
+                </div>
+            {% endif %}    
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-success">
+                        Submit Request
+                    </button>
+
+                    <a href="{% url 'home' %}" class="btn btn-secondary">
+                        Cancel
+                    </a>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}{{ opportunity.name }} - CRM CPQ{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>{{ opportunity.name }}</h1>
+        <p style="font-size: 14px; color: #7f8c8d; margin: 0;">
+            Account: <strong>{{ opportunity.account.company_name }}</strong>
+        </p>
+    </div>
+    
+    <div class="card-body detail-items">
+        <div class="detail-item">
+            <span class="label">Account Contact:</span>
+            <span class="value">{{ opportunity.account.contact_person_name }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="label">Email:</span>
+            <span class="value">{{ opportunity.account.email }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="label">Phone:</span>
+            <span class="value">{{ opportunity.account.phone }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="label">Industry:</span>
+            <span class="value">{{ opportunity.account.industry }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="label">Stage:</span>
+            <span class="value">{{ opportunity.stage }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="label">Status:</span>
+            <span class="value"><span class="badge badge-{{ opportunity.status|lower }}">{{ opportunity.status }}</span></span>
+        </div>
+        <div class="detail-item">
+            <span class="label">Expected Close Date:</span>
+            <span class="value">{{ opportunity.expected_close_date|date:"M d, Y" }}</span>
+        </div>
+        {% if opportunity.description %}
+            <div class="detail-item">
+                <span class="label">Description:</span>
+                <span class="value">{{ opportunity.description }}</span>
+            </div>
+        {% endif %}
+        <div class="detail-item">
+            <span class="label">Created:</span>
+            <span class="value">{{ opportunity.created_at|date:"M d, Y H:i" }}</span>
+        </div>
+    </div>
+</div>
+
+<div style="margin-top: 20px;">
+    <div class="card">
+        <div class="card-header">
+            <h2>Quotes</h2>
+        </div>
+        <div class="card-body">
+            {% if quotes %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Quote Number</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for quote in quotes %}
+                            <tr>
+                                <td>{{ quote.number }}</td>
+                                <td><span class="badge badge-{{ quote.status|lower }}">{{ quote.status }}</span></td>
+                                <td>${{ quote.get_total|floatformat:2 }}</td>
+                                <td>{{ quote.created_at|date:"M d, Y" }}</td>
+                                <td class="table-actions">
+                                    <a href="{% url 'quote_detail' quote.id %}" class="action-view">View</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No quotes yet. <a href="{% url 'quote_create' %}">Create one</a></p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="btn-group" style="margin-top: 20px; justify-content: center;">
+    <a href="{% url 'opportunity_update' opportunity.id %}" class="btn btn-warning">Edit</a>
+    <a href="{% url 'opportunity_delete' opportunity.id %}" class="btn btn-danger">Delete</a>
+    <a href="{% url 'opportunity_list' %}" class="btn btn-secondary">Back to List</a>
+</div>
+{% endblock %}

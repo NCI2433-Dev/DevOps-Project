@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Leads - CRM CPQ{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>Leads</h1>
+    </div>
+    
+    <div class="filter-section">
+        <div class="filter-item">
+            <label for="status-filter">Filter by Status:</label>
+            <select id="status-filter" onchange="window.location.href='?status=' + this.value" class="form-select">
+                <option value="">All Statuses</option>
+                {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div style="flex: 1;"></div>
+        <a href="{% url 'lead_create' %}" class="btn btn-success">+ New Lead</a>
+    </div>
+    
+    <div class="card-body">
+        {% if leads %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Reference #</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Company</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lead in leads %}
+                        <tr>
+                            <td>{{ lead.reference_number }}</td>
+                            <td>{{ lead.first_name }} {{ lead.last_name }}</td>
+                            <td>{{ lead.email }}</td>
+                            <td>{{ lead.company_name }}</td>
+                            <td><span class="badge badge-{{ lead.status|lower }}">{{ lead.status }}</span></td>
+                            <td>{{ lead.created_at|date:"M d, Y" }}</td>
+                            <td class="table-actions">
+                                <a href="{% url 'lead_detail' lead.id %}" class="action-view">View</a>
+                                <a href="{% url 'lead_update' lead.id %}" class="action-edit">Edit</a>
+                                <a href="{% url 'lead_convert' lead.id %}" class="action-convert" {% if lead.status == 'Converted' %}style="opacity:0.5; pointer-events: none;"{% endif %}>Convert</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No leads found.</p>
+        {% endif %}
+        
+        {% if page_obj.has_other_pages %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1">First</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">Prev</a>
+                {% endif %}
+                
+                <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">Next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

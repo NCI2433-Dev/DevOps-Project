@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Quotes - CRM CPQ{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>Quotes</h1>
+    </div>
+    
+    <div class="filter-section">
+        <div class="filter-item">
+            <label for="status-filter">Status:</label>
+            <select id="status-filter" onchange="updateFilters()" class="form-select">
+                <option value="">All</option>
+                {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div style="flex: 1;"></div>
+        <a href="{% url 'quote_create' %}" class="btn btn-success">+ New Quote</a>
+    </div>
+    
+    <div class="card-body">
+        {% if quotes %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Quote Number</th>
+                        <th>Opportunity</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for quote in quotes %}
+                        <tr>
+                            <td>{{ quote.number }}</td>
+                            <td>{{ quote.opportunity.name }}</td>
+                            <td><span class="badge badge-{{ quote.status|lower }}">{{ quote.status }}</span></td>
+                            <td>${{ quote.get_total|floatformat:2 }}</td>
+                            <td>{{ quote.created_at|date:"M d, Y" }}</td>
+                            <td class="table-actions">
+                                <a href="{% url 'quote_detail' quote.id %}" class="action-view">View</a>
+                                {% if quote.can_edit %}
+                                    <a href="{% url 'quote_update' quote.id %}" class="action-edit">Edit</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No quotes found.</p>
+        {% endif %}
+        
+        {% if page_obj.has_other_pages %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1">First</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">Prev</a>
+                {% endif %}
+                
+                <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">Next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function updateFilters() {
+    const status = document.getElementById('status-filter').value;
+    let url = '?';
+    if (status) url += 'status=' + status;
+    window.location.href = url;
+}
+</script>
+{% endblock %}

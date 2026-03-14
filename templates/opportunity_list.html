@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Opportunities - CRM CPQ{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>Opportunities</h1>
+    </div>
+    
+    <div class="filter-section">
+        <div class="filter-item">
+            <label for="status-filter">Status:</label>
+            <select id="status-filter" onchange="updateFilters()" class="form-select">
+                <option value="">All</option>
+                {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-item">
+            <label for="stage-filter">Stage:</label>
+            <select id="stage-filter" onchange="updateFilters()" class="form-select">
+                <option value="">All</option>
+                {% for value, label in stage_choices %}
+                    <option value="{{ value }}" {% if stage_filter == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div style="flex: 1;"></div>
+        <a href="{% url 'opportunity_create' %}" class="btn btn-success">+ New Opportunity</a>
+    </div>
+    
+    <div class="card-body">
+        {% if opportunities %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Opportunity Name</th>
+                        <th>Account</th>
+                        <th>Stage</th>
+                        <th>Status</th>
+                        <th>Expected Close</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for opp in opportunities %}
+                        <tr>
+                            <td>{{ opp.name }}</td>
+                            <td>{{ opp.account.company_name }}</td>
+                            <td>{{ opp.stage }}</td>
+                            <td><span class="badge badge-{{ opp.status|lower }}">{{ opp.status }}</span></td>
+                            <td>{{ opp.expected_close_date|date:"M d, Y" }}</td>
+                            <td class="table-actions">
+                                <a href="{% url 'opportunity_detail' opp.id %}" class="action-view">View</a>
+                                <a href="{% url 'opportunity_update' opp.id %}" class="action-edit">Edit</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No opportunities found.</p>
+        {% endif %}
+        
+        {% if page_obj.has_other_pages %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1">First</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">Prev</a>
+                {% endif %}
+                
+                <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">Next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function updateFilters() {
+    const status = document.getElementById('status-filter').value;
+    const stage = document.getElementById('stage-filter').value;
+    let url = '?';
+    if (status) url += 'status=' + status;
+    if (stage) url += (url !== '?' ? '&' : '') + 'stage=' + stage;
+    window.location.href = url;
+}
+</script>
+{% endblock %}
