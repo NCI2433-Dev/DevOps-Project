@@ -15,13 +15,12 @@ urlpatterns = [
     path('products/', views.product_list, name='product_list'),
     path('products/<int:id>/', views.product_detail, name='product_detail'),
     path('quote-request/', views.request_quote, name='request_quote'),
-    path('registration/', views.registration, name='registration'), # Removed trailing whitespace
+    path('registration/', views.registration, name='registration'),
     path('quote-request/success/<str:ref_num>/',
          views.quote_request_success, name='quote_request_success'),
 
     # Authenticated user views
-    path('my-orders/', views.my_orders, name='my_orders'), # Removed trailing whitespace
-
+    path('my-orders/', views.my_orders, name='my_orders'), 
     # Sales dashboard
     path('sales/', views.sales_dashboard, name='sales_dashboard'),
 
