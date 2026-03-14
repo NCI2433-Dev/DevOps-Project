@@ -30,11 +30,9 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          fi
+          pip install -r requirements.txt
           pip install pylint pylint-django
 
       - name: Run pylint
         run: |
-          pylint --load-plugins pylint_django $(git ls-files '*.py')
+          pylint --load-plugins pylint_django crm cpq_project manage.py
