@@ -1,10 +1,11 @@
-name: Static Analysis Pylint
+name: static analytics
 
 on:
   push:
     branches:
       - main
   pull_request:
+    types: [opened, synchronize, reopened]
     branches:
       - main
 
@@ -13,10 +14,8 @@ permissions:
 
 jobs:
   lint:
+    name: Pylint
     runs-on: ubuntu-latest
-
-    env:
-      DJANGO_SETTINGS_MODULE: cpq_project.settings
 
     steps:
       - name: Checkout repository
@@ -30,9 +29,33 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+<<<<<<< HEAD
           pip install -r requirements.txt
           pip install pylint pylint-django
+=======
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pylint
+>>>>>>> b77c2fc (Update project files and workflow)
 
-      - name: Run pylint
+      - name: Run pylint on tracked Python files
         run: |
+<<<<<<< HEAD
           pylint --load-plugins pylint_django crm cpq_project manage.py
+=======
+          pylint --disable=R,C0114,C0115,C0303 $(git ls-files '*.py')
+
+  sonarqube:
+    name: SonarQube
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+>>>>>>> b77c2fc (Update project files and workflow)
