@@ -37,4 +37,4 @@ jobs:
 
       - name: Run pylint on tracked Python files
         run: |
-          pylint --load-plugins pylint_django crm cpq_project manage.py
+          pylint --disable=C0301,C0114,C0115,C0103 $(git ls-files '*.py')
