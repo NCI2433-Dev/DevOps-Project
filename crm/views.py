@@ -5,6 +5,7 @@ from functools import wraps
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -72,7 +73,7 @@ def request_quote(request):
         try:
             product = Product.objects.get(id=product_id)
             initial_data['product_interested'] = product
-        except Product.DoesNotExist:
+        except ObjectDoesNotExist:
             pass
 
     if request.method == 'POST':
