@@ -34,7 +34,7 @@ jobs:
 
       - name: Run pylint on tracked Python files
         run: |
-          pylint --disable=R,C0114,C0115,C0303 $(git ls-files '*.py')
+          pylint --disable=R,C0114,C0115,C0303 crm
 
   sonarqube:
     name: SonarQube
