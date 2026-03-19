@@ -52,10 +52,3 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.projectKey=NCI2433-Dev_DevOps-Project
-            -Dsonar.organization=nci2433-dev
-            -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.sources=crm,cpq_project
-            -Dsonar.exclusions=**/migrations/**,**/__pycache__/**,**/.venv/**,**/venv/**
