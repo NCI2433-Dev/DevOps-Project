@@ -10,3 +10,5 @@ staticfiles/
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 .venv
+*.pem
+*.txteb
