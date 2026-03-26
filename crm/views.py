@@ -21,6 +21,61 @@ from .forms import (
 )
 from .models import Account, Lead, Opportunity, Product, Quote
 
+import stripe
+from django.conf import settings
+from django.urls import reverse
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
+@login_required
+def create_checkout_session(request, quote_id):
+    """Create Stripe Checkout Session for a quote."""
+    quote = get_object_or_404(Quote, id=quote_id)
+    
+    # Provide the standard Stripe checkout session config
+    session = stripe.checkout.Session.create(
+        payment_method_types=['card'],
+        line_items=[{
+            'price_data': {
+                'currency': 'usd',
+                'product_data': {
+                    'name': f"Quote #{quote.number}",
+                    'description': "💳 Test Card: 4242 4242 4242 4242 (Any Exp/CVC)"
+                },
+                'unit_amount': int(quote.get_total() * 100),
+            },
+            'quantity': 1,
+        }],
+        mode='payment',
+        success_url=request.build_absolute_uri(reverse('payment_success', args=[quote.id])),
+        cancel_url=request.build_absolute_uri(reverse('payment_cancel', args=[quote.id])),
+        custom_text={
+            'submit': {
+                'message': "Test Mode: Use card 4242 4242 4242 4242",
+            }
+        }
+    )
+    return redirect(session.url, code=303)
+
+
+@login_required
+def payment_success(request, quote_id):
+    """Handle successful payment."""
+    quote = get_object_or_404(Quote, id=quote_id)
+    quote.status = 'Paid'
+    quote.save()
+    messages.success(request, f"Payment successful for Quote #{quote.number}!")
+    return redirect('my_orders')
+
+
+@login_required
+def payment_cancel(request, quote_id):
+    """Handle cancelled payment."""
+    quote = get_object_or_404(Quote, id=quote_id)
+    messages.warning(request, f"Payment cancelled for Quote #{quote.number}.")
+    return redirect('my_orders')
+
 
 def staff_required(view_func):
     """Decorator to check if user is staff."""
@@ -33,16 +88,6 @@ def staff_required(view_func):
         return view_func(request, *args, **kwargs)
     return wrapper
 
-
-def superuser_required(view_func):
-    """Decorator to check if user is superuser."""
-    @wraps(view_func)
-    def wrapper(request, *args, **kwargs):
-        if not request.user.is_authenticated or not request.user.is_superuser:
-            messages.error(request, "Admin access required.")
-            return redirect('login')
-        return view_func(request, *args, **kwargs)
-    return wrapper
 
 
 # ==================== GUEST VIEWS ====================
@@ -65,7 +110,7 @@ def product_detail(request, pk):
 
 
 def request_quote(request):
-    """Guest quote request form."""
+    """Quote request form — works for both guests and logged-in users."""
     # If product_id is in query string, pre-select it
     product_id = request.GET.get('product_id')
     initial_data = {}
@@ -77,16 +122,19 @@ def request_quote(request):
             pass
 
     if request.method == 'POST':
-        form = RequestQuoteForm(request.POST)
+        # For authenticated users, inject their email so the form validates
+        post_data = request.POST.copy()
+        if request.user.is_authenticated and not post_data.get('email'):
+            post_data['email'] = request.user.email
+
+        form = RequestQuoteForm(post_data)
         if form.is_valid():
             lead = form.save(commit=False)
-            # Set default values for fields not in guest form
-            lead.first_name = 'Guest'
-            lead.last_name = 'Inquiry'
-            lead.company_name = 'Not Provided'
-            lead.phone = 'N/A'
             lead.status = 'New'
-            lead.source = 'Web Form'
+            if request.user.is_authenticated:
+                lead.company_name = 'Registered User'
+            else:
+                lead.company_name = 'Not Provided'
             lead.save()
             return redirect('quote_request_success', ref_num=lead.reference_number)
     else:
@@ -96,29 +144,21 @@ def request_quote(request):
 
 def registration(request):
     """User registration form."""
+    prefill_email = request.GET.get('email', '')
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # Create associated Lead record
-            Lead.objects.create(
-                first_name=form.cleaned_data.get('username', 'User'),
-                last_name='',
-                email=user.email,
-                phone='',
-                company_name=form.cleaned_data.get('company_name', ''),
-                status='New',
-                source='Registration',
-            )
             messages.success(request, 'Registration successful! Please log in.')
-            return redirect('login')
+            return redirect(f"/accounts/login/?username={user.username}")
         for field, errors in form.errors.items():
             for error in errors:
                 messages.error(request, f"{field}: {error}")
     else:
-        form = RegistrationForm()
+        initial = {'email': prefill_email} if prefill_email else {}
+        form = RegistrationForm(initial=initial)
 
-    return render(request, 'registration.html', {'form': form})
+    return render(request, 'registration.html', {'form': form, 'prefill_email': prefill_email})
 
 
 def user_logout(request):
@@ -130,8 +170,11 @@ def user_logout(request):
 
 def quote_request_success(request, ref_num):
     """Quote request success page (shows only reference number for privacy)."""
-    get_object_or_404(Lead, reference_number=ref_num)
-    return render(request, 'quote_request_success.html', {'reference_number': ref_num})
+    lead = get_object_or_404(Lead, reference_number=ref_num)
+    return render(request, 'quote_request_success.html', {
+        'reference_number': ref_num,
+        'guest_email': lead.email,
+    })
 
 
 @login_required
@@ -158,6 +201,8 @@ def my_orders(request):
         'leads': user_leads,
         'quotes': all_quotes,
         'orders_count': all_quotes.count(),
+        'approved_count': all_quotes.filter(status='Approved').count(),
+        'in_progress_count': all_quotes.filter(status__in=['Draft', 'Submitted']).count(),
     }
     return render(request, 'my_orders.html', context)
 
@@ -169,28 +214,19 @@ def my_orders(request):
 def sales_dashboard(request):
     """Sales dashboard with KPIs."""
     leads_new = Lead.objects.filter(status='New').count()
-    leads_contacted = Lead.objects.filter(status='Contacted').count()
     leads_qualified = Lead.objects.filter(status='Qualified').count()
     leads_converted = Lead.objects.filter(status='Converted').count()
-
     opportunities_open = Opportunity.objects.filter(status='Open').count()
-
     quotes_draft = Quote.objects.filter(status='Draft').count()
-    quotes_submitted = Quote.objects.filter(status='Submitted').count()
     quotes_approved = Quote.objects.filter(status='Approved').count()
-
-    recent_quotes = Quote.objects.all()[:5]
 
     context = {
         'leads_new': leads_new,
-        'leads_contacted': leads_contacted,
         'leads_qualified': leads_qualified,
         'leads_converted': leads_converted,
         'opportunities_open': opportunities_open,
         'quotes_draft': quotes_draft,
-        'quotes_submitted': quotes_submitted,
         'quotes_approved': quotes_approved,
-        'recent_quotes': recent_quotes,
     }
     return render(request, 'sales_dashboard.html', context)
 
@@ -298,6 +334,7 @@ def lead_convert(request, pk):
                 account=account,
                 name=f"{lead.company_name} - "
                      f"{timezone.now().strftime('%B %Y')}",
+                description=form.cleaned_data.get('opportunity_notes', ''),
                 status='Open',
                 stage='Qualification',
                 expected_close_date=timezone.now().date() + timedelta(days=30)
@@ -315,9 +352,7 @@ def lead_convert(request, pk):
         # Pre-fill form with lead data
         form = AccountForm(initial={
             'company_name': lead.company_name,
-            'contact_person_name': f"{lead.first_name} {lead.last_name}",
             'email': lead.email,
-            'phone': lead.phone,
         })
 
     return render(request, 'lead_convert.html',
@@ -325,6 +360,14 @@ def lead_convert(request, pk):
 
 
 # ==================== OPPORTUNITY VIEWS ====================
+
+@login_required
+@staff_required
+def opportunity_create_quote(request, pk):
+    """Shortcut: redirect to quote_create with the opportunity ID in the URL."""
+    opp = get_object_or_404(Opportunity, id=pk)
+    return redirect(reverse('quote_create', args=[opp.id]))
+
 
 @login_required
 @staff_required
@@ -437,8 +480,12 @@ def quote_list(request):
 
 @login_required
 @staff_required
-def quote_create(request):
+def quote_create(request, opp_id=None):
     """Create new quote with line items."""
+    opp = None
+    if opp_id:
+        opp = get_object_or_404(Opportunity, id=opp_id)
+
     if request.method == 'POST':
         form = QuoteForm(request.POST)
         formset = QuoteLineItemFormSet(request.POST)
@@ -451,13 +498,18 @@ def quote_create(request):
             messages.success(request, f"Quote {quote.number} created successfully.")
             return redirect('quote_detail', pk=quote.id)
     else:
-        form = QuoteForm()
+        initial_data = {}
+        if opp:
+            initial_data['opportunity'] = opp
+
+        form = QuoteForm(initial=initial_data)
         formset = QuoteLineItemFormSet()
 
     context = {
         'form': form,
         'formset': formset,
         'title': 'Create Quote',
+        'opportunity': opp,
     }
     return render(request, 'quote_form.html', context)
 

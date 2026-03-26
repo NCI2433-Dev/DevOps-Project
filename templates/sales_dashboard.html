@@ -4,22 +4,45 @@
 {% block content %}
 <h1>Sales Dashboard</h1>
 
+<!-- Flow indicator -->
+<div style="display:flex; align-items:center; justify-content:center; gap:0; margin-bottom:30px;">
+    <a href="{% url 'lead_list' %}" style="text-decoration:none;"
+       style="display:flex; flex-direction:column; align-items:center; padding:12px 30px;
+              background:#3498db; color:white; border-radius:8px 0 0 8px; font-weight:bold;">
+        <div style="background:#3498db; color:white; padding:12px 28px; border-radius:8px 0 0 8px; font-weight:bold; text-align:center;">
+            📋 Inquiries<br><small style="font-weight:normal;">Qualify &amp; Convert</small>
+        </div>
+    </a>
+    <div style="font-size:20px; color:#bdc3c7; padding:0 4px;">→</div>
+    <a href="{% url 'opportunity_list' %}" style="text-decoration:none;">
+        <div style="background:#2ecc71; color:white; padding:12px 28px; font-weight:bold; text-align:center;">
+            🤝 Supply Deals<br><small style="font-weight:normal;">Manage &amp; Quote</small>
+        </div>
+    </a>
+    <div style="font-size:20px; color:#bdc3c7; padding:0 4px;">→</div>
+    <a href="{% url 'quote_list' %}" style="text-decoration:none;">
+        <div style="background:#9b59b6; color:white; padding:12px 28px; border-radius:0 8px 8px 0; font-weight:bold; text-align:center;">
+            📄 Supply Quotes<br><small style="font-weight:normal;">Approve &amp; Close</small>
+        </div>
+    </a>
+</div>
+
 <div class="stats-grid">
     <div class="stat-box success">
         <div class="stat-number">{{ leads_converted }}</div>
-        <div class="stat-label">Converted Leads</div>
+        <div class="stat-label">Converted Inquiries</div>
     </div>
     <div class="stat-box">
         <div class="stat-number">{{ leads_new }}</div>
-        <div class="stat-label">New Leads</div>
+        <div class="stat-label">New Inquiries</div>
     </div>
     <div class="stat-box warning">
         <div class="stat-number">{{ leads_qualified }}</div>
-        <div class="stat-label">Qualified Leads</div>
+        <div class="stat-label">Qualified Inquiries</div>
     </div>
     <div class="stat-box">
         <div class="stat-number">{{ opportunities_open }}</div>
-        <div class="stat-label">Open Opportunities</div>
+        <div class="stat-label">Open Supply Deals</div>
     </div>
     <div class="stat-box danger">
         <div class="stat-number">{{ quotes_draft }}</div>
@@ -31,45 +54,4 @@
     </div>
 </div>
 
-<div class="card">
-    <div class="card-header">
-        <h2>Recent Quotes</h2>
-    </div>
-    <div class="card-body">
-        {% if recent_quotes %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Quote Number</th>
-                        <th>Opportunity</th>
-                        <th>Status</th>
-                        <th>Created</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for quote in recent_quotes %}
-                        <tr>
-                            <td>{{ quote.number }}</td>
-                            <td>{{ quote.opportunity.name }}</td>
-                            <td><span class="badge badge-{{ quote.status|lower }}">{{ quote.status }}</span></td>
-                            <td>{{ quote.created_at|date:"M d, Y" }}</td>
-                            <td class="table-actions">
-                                <a href="{% url 'quote_detail' quote.id %}" class="action-view">View</a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>No quotes yet.</p>
-        {% endif %}
-    </div>
-</div>
-
-<div class="btn-group" style="justify-content: center; margin-top: 30px;">
-    <a href="{% url 'lead_list' %}" class="btn btn-primary">Manage Leads</a>
-    <a href="{% url 'opportunity_list' %}" class="btn btn-primary">Manage Opportunities</a>
-    <a href="{% url 'quote_list' %}" class="btn btn-primary">Manage Quotes</a>
-</div>
 {% endblock %}

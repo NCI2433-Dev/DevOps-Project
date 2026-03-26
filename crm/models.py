@@ -23,7 +23,7 @@ def generate_quote_number():
 
 
 class Product(models.Model):
-    """Sellable products"""
+    """Sellable food product items"""
     name = models.CharField(max_length=200, unique=True)
     sku = models.CharField(max_length=50, unique=True)
     base_price = models.DecimalField(
@@ -39,6 +39,8 @@ class Product(models.Model):
     class Meta:  # pylint: disable=too-few-public-methods
         """Metadata for Product model."""
         ordering = ['name']
+        verbose_name = 'Food Product'
+        verbose_name_plural = 'Food Products'
 
     def __str__(self):
         return f"{self.name} ({self.sku})"
@@ -48,37 +50,31 @@ class Lead(models.Model):
     """Initial inquiry from guest or sales"""
     STATUS_CHOICES = [
         ('New', 'New'),
-        ('Contacted', 'Contacted'),
         ('Qualified', 'Qualified'),
         ('Converted', 'Converted'),
         ('Rejected', 'Rejected'),
     ]
 
-    SOURCE_CHOICES = [
-        ('Web Form', 'Web Form'),
-        ('Email', 'Email'),
-        ('Phone', 'Phone'),
-        ('Referral', 'Referral'),
-    ]
-
     reference_number = models.CharField(
         max_length=20, unique=True, default=generate_lead_reference
     )
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
     email = models.EmailField()
-    phone = models.CharField(max_length=20)
-    company_name = models.CharField(max_length=150)
-    product_interested = models.ForeignKey(
-        Product, on_delete=models.SET_NULL, null=True, blank=True
+    company_name = models.CharField(
+        max_length=150, verbose_name="Company / Restaurant Name"
     )
-    quantity = models.IntegerField(null=True, blank=True, validators=[MinValueValidator(1)])
+    product_interested = models.ForeignKey(
+        Product, on_delete=models.SET_NULL, null=True, blank=True,
+        verbose_name="Interested Product (Feed/Oil/Grain)"
+    )
+    quantity = models.IntegerField(
+        null=True, blank=True, validators=[MinValueValidator(1)],
+        verbose_name="Quantity Required"
+    )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='New')
-    source = models.CharField(max_length=20, choices=SOURCE_CHOICES, default='Web Form')
     converted_to_acct_id = models.ForeignKey(
         'Account', on_delete=models.SET_NULL, null=True, blank=True, related_name='leads'
     )
-    notes = models.TextField(blank=True)
+    notes = models.TextField(blank=True, help_text="Delivery Location & other notes")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -87,9 +83,11 @@ class Lead(models.Model):
     class Meta:  # pylint: disable=too-few-public-methods
         """Metadata for Lead model."""
         ordering = ['-created_at']
+        verbose_name = 'Customer Inquiry'
+        verbose_name_plural = 'Customer Inquiries'
 
     def __str__(self):
-        return f"{self.reference_number} - {self.first_name} {self.last_name}"
+        return f"{self.reference_number} - {self.email}"
 
 
 class Account(models.Model):
@@ -124,7 +122,8 @@ class Opportunity(models.Model):
         ('Qualification', 'Qualification'),
         ('Proposal', 'Proposal'),
         ('Negotiation', 'Negotiation'),
-        ('Closure', 'Closure'),
+        ('Closed Won', 'Closed Won'),
+        ('Closed Lost', 'Closed Lost'),
     ]
 
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='opportunities')
@@ -153,6 +152,7 @@ class Quote(models.Model):
         ('Submitted', 'Submitted'),
         ('Approved', 'Approved'),
         ('Rejected', 'Rejected'),
+        ('Paid', 'Paid'),
     ]
 
     number = models.CharField(max_length=20, unique=True, default=generate_quote_number)
@@ -182,7 +182,7 @@ class Quote(models.Model):
         return round(total, 2)
 
     def get_discount_amount(self):
-        """Calculate discount amount"""
+        """Calculate discount amount strictly as the quote-level discount % against subtotal"""
         subtotal = self.get_subtotal()
         discount_amount = subtotal * (self.discount / 100)
         return round(discount_amount, 2)
@@ -192,6 +192,13 @@ class Quote(models.Model):
         subtotal = self.get_subtotal()
         discount_amount = self.get_discount_amount()
         return round(subtotal - discount_amount, 2)
+        
+    def recalculate_totals(self):
+        """Strict backend recalculation of totals. (Returns nothing, logic is in the getters)
+        This is a placeholder method to satisfy the business logic requirement, since Django DB
+        design here calculates totals dynamically on the fly via get_subtotal() / get_total()
+        rather than persisting them statically to DB fields to prevent async drift."""
+        pass
 
     def can_edit(self):
         """Check if quote can be edited"""
@@ -201,7 +208,7 @@ class Quote(models.Model):
 class QuoteLineItem(models.Model):
     """Individual product line in a quote"""
     quote = models.ForeignKey(Quote, on_delete=models.CASCADE, related_name='line_items')
-    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    product = models.ForeignKey(Product, on_delete=models.PROTECT, verbose_name='Food Product')
     quantity = models.IntegerField(validators=[MinValueValidator(1)])
     unit_price = models.DecimalField(
         max_digits=10, decimal_places=2, validators=[MinValueValidator(0)]

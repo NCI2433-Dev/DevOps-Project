@@ -5,10 +5,18 @@ db.sqlite3
 staticfiles/
 .DS_Store
 
+# Virtual environments
+venv/
+.venv/
+.venv_local/
+
+# Environment variable files (contain secrets – never commit these)
+.env
+*.env
+
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
-.venv
 *.pem
 *.txteb

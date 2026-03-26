@@ -2,6 +2,10 @@
 from django.contrib import admin
 
 from .models import Account, Lead, Opportunity, Product, Quote, QuoteLineItem
+from django.contrib.auth.models import Group
+
+# Unregister the default Group model from the admin interface
+admin.site.unregister(Group)
 
 
 @admin.register(Product)
@@ -16,11 +20,8 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(Lead)
 class LeadAdmin(admin.ModelAdmin):
     """Admin interface for Lead model."""
-    list_display = [
-        'reference_number', 'first_name', 'last_name',
-        'email', 'company_name', 'status', 'created_at'
-    ]
-    list_filter = ['status', 'source', 'created_at']
+    list_display = ['reference_number', 'email', 'company_name', 'status', 'created_at']
+    list_filter = ['status', 'created_at']
     search_fields = ['reference_number', 'email', 'company_name']
     readonly_fields = ['reference_number', 'created_at', 'updated_at']
     ordering = ['-created_at']

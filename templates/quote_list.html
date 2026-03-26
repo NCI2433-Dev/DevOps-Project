@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Quotes - CRM CPQ{% endblock %}
+{% block title %}Supply Quotes - CRM CPQ{% endblock %}
 
 {% block content %}
 <div class="card">
     <div class="card-header">
-        <h1>Quotes</h1>
+        <h1>Supply Quotes</h1>
     </div>
     
     <div class="filter-section">
@@ -18,7 +18,9 @@
             </select>
         </div>
         <div style="flex: 1;"></div>
-        <a href="{% url 'quote_create' %}" class="btn btn-success">+ New Quote</a>
+        <a href="{% url 'opportunity_list' %}" class="btn btn-secondary" style="font-size:13px;">
+            ← Create supply quotes from Supply Deals
+        </a>
     </div>
     
     <div class="card-body">
@@ -27,7 +29,7 @@
                 <thead>
                     <tr>
                         <th>Quote Number</th>
-                        <th>Opportunity</th>
+                        <th>Supply Deal</th>
                         <th>Status</th>
                         <th>Total</th>
                         <th>Created</th>
@@ -53,7 +55,7 @@
                 </tbody>
             </table>
         {% else %}
-            <p>No quotes found.</p>
+            <p>No supply quotes found.</p>
         {% endif %}
         
         {% if page_obj.has_other_pages %}

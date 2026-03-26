@@ -9,20 +9,33 @@
         </div>
         <div class="card-body" style="text-align: center;">
             <p style="font-size: 16px; margin: 20px 0;">Thank you for your quote request!</p>
-            
+
             <div style="background-color: #f8f9f9; padding: 20px; border-radius: 4px; margin: 20px 0;">
                 <p style="font-size: 12px; color: #7f8c8d; margin: 0;">Your Reference Number</p>
-                <p style="font-size: 32px; font-weight: bold; color: #2c3e50; margin: 10px 0;">{{ reference_number }}</p>
+                <p style="font-size: 32px; font-weight: bold; color: #2c3e50; margin: 10px 0;">{{ reference_number }}
+                </p>
             </div>
-            
-            <p style="color: #555; margin: 20px 0;">A member of our sales team will contact you shortly to discuss your requirements and provide a detailed quote.</p>
-            
+
+            <p style="color: #555; margin: 20px 0;">A member of our sales team will contact you shortly to discuss your
+                requirements and provide a detailed quote.</p>
+
             <div class="btn-group" style="justify-content: center;">
                 <a href="{% url 'home' %}" class="btn btn-primary">Back to Home</a>
             </div>
-             <div class="btn-group" style="justify-content: center;">
-                <a href="{% url 'registration' %}" class="btn btn-primary">Register to see all your quotes and status of your request</a>
+            {% if user.is_authenticated %}
+            <div class="btn-group" style="justify-content: center; margin-top: 10px;">
+                <a href="{% url 'my_orders' %}" class="btn btn-secondary">My Orders</a>
             </div>
+            {% else %}
+            <div class="btn-group" style="justify-content: center; gap: 15px;">
+                <a href="{% url 'registration' %}?email={{ guest_email }}" class="btn btn-primary">
+                    Create Account to see your quote
+                </a>
+                <a href="{% url 'login' %}?next={% url 'my_orders' %}&username={{ guest_email }}" class="btn btn-secondary">
+                    Login (if you already have an account)
+                </a>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

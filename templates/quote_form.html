@@ -2,90 +2,155 @@
 {% block title %}{{ title }} - CRM CPQ{% endblock %}
 
 {% block content %}
-<div style="width: 95%; max-width: 1000px; margin: 20px auto;">
-    <div class="card">
-        <div class="card-header">
-            <h1>{{ title }}</h1>
-        </div>
-        <div class="card-body">
-            <form method="post">
-                {% csrf_token %}
-                {% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors }}</div>{% endif %}
-                
-                <div class="form-row">
-                    <div class="form-group" style="flex: 1;">
-                        <label for="{{ form.opportunity.id_for_label }}">{{ form.opportunity.label }}</label>
-                        {{ form.opportunity }}
-                        {% if form.opportunity.errors %}<span style="color: #e74c3c;">{{ form.opportunity.errors.0 }}</span>{% endif %}
-                    </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label for="{{ form.discount.id_for_label }}">{{ form.discount.label }} (%)</label>
-                        {{ form.discount }}
-                        {% if form.discount.errors %}<span style="color: #e74c3c;">{{ form.discount.errors.0 }}</span>{% endif %}
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
-                    {{ form.notes }}
-                    {% if form.notes.errors %}<span style="color: #e74c3c;">{{ form.notes.errors.0 }}</span>{% endif %}
-                </div>
-                
-                <h3 style="margin-top: 30px;">Quote Line Items</h3>
-                {% if formset.non_form_errors %}<div class="alert alert-error">{{ formset.non_form_errors }}</div>{% endif %}
-                
-                <table style="width: 100%; margin-bottom: 20px;">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Unit Price</th>
-                            <th>Quantity</th>
-                            <th>Discount (%)</th>
-                            <th>Line Total</th>
-                            <th>Remove</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for form_item in formset %}
-                            <tr>
-                                <td>
-                                    {{ form_item.product }}
-                                    {% if form_item.product.errors %}<span style="color: #e74c3c; font-size: 12px;">{{ form_item.product.errors.0 }}</span>{% endif %}
-                                </td>
-                                <td>
-                                    <span id="unit-price-{{ forloop.counter0 }}">${{ form_item.product.value|default:"0.00" }}</span>
-                                </td>
-                                <td>
-                                    {{ form_item.quantity }}
-                                    {% if form_item.quantity.errors %}<span style="color: #e74c3c; font-size: 12px;">{{ form_item.quantity.errors.0 }}</span>{% endif %}
-                                </td>
-                                <td>
-                                    {{ form_item.discount }}
-                                    {% if form_item.discount.errors %}<span style="color: #e74c3c; font-size: 12px;">{{ form_item.discount.errors.0 }}</span>{% endif %}
-                                </td>
-                                <td>
-                                    <span id="line-total-{{ forloop.counter0 }}">$0.00</span>
-                                </td>
-                                <td>
-                                    {{ form_item.DELETE }}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                
-                {{ formset.management_form }}
-                
-                <div class="btn-group">
-                    <button type="submit" class="btn btn-success">Save Quote</button>
-                    {% if form.instance.pk %}
-                        <a href="{% url 'quote_detail' form.instance.id %}" class="btn btn-secondary">Cancel</a>
-                    {% else %}
-                        <a href="{% url 'quote_list' %}" class="btn btn-secondary">Cancel</a>
-                    {% endif %}
-                </div>
-            </form>
-        </div>
+<div style="width: 95%; max-width: 900px; margin: 20px auto;">
+
+  <!-- Flow indicator -->
+  <div style="font-size:13px; color:#888; margin-bottom:16px;">
+    📋 Inquiry &nbsp;→&nbsp; 🤝 Supply Deal &nbsp;→&nbsp; <strong style="color:#3498db;">📄 Supply Quote</strong>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h1>{{ title }}</h1>
     </div>
+
+    <div class="card-body">
+      <form method="post" id="quote-form">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="alert alert-error">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <!-- ── Quote Context ── -->
+        <div class="form-row" style="margin-bottom:16px;">
+          <div class="form-group" style="flex:1;">
+            <label for="{{ form.opportunity.id_for_label }}">Linked Deal / Customer</label>
+            {{ form.opportunity }}
+            {% if form.opportunity.errors %}<span style="color:#e74c3c; font-size:12px;">{{ form.opportunity.errors.0 }}</span>{% endif %}
+          </div>
+        </div>
+
+        <!-- ── Quote-level discount & notes ── -->
+        <div class="form-row" style="margin-bottom:16px;">
+          <div class="form-group" style="flex:1; max-width:200px;">
+            <label for="{{ form.discount.id_for_label }}">Overall Discount (%)</label>
+            {{ form.discount }}
+            {% if form.discount.errors %}<span style="color:#e74c3c; font-size:12px;">{{ form.discount.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="form-group" style="flex:3;">
+            <label for="{{ form.notes.id_for_label }}">Notes</label>
+            {{ form.notes }}
+            {% if form.notes.errors %}<span style="color:#e74c3c; font-size:12px;">{{ form.notes.errors.0 }}</span>{% endif %}
+          </div>
+        </div>
+
+        <!-- ── Line Items ── -->
+        <h3 style="margin-top:24px; margin-bottom:12px;">🛒 Food Products / Order Items</h3>
+        {% if formset.non_form_errors %}
+          <div class="alert alert-error">{{ formset.non_form_errors }}</div>
+        {% endif %}
+
+        {{ formset.management_form }}
+
+        <table style="width:100%; border-collapse:collapse; margin-bottom:8px;" id="line-items-table">
+          <thead>
+            <tr style="background:#f8f9fa; border-bottom:2px solid #dee2e6;">
+              <th style="padding:8px 6px; text-align:left;">Food Product</th>
+              <th style="padding:8px 6px; text-align:left;">Unit Price ($)</th>
+              <th style="padding:8px 6px; text-align:left;">Qty (kg/tons/units)</th>
+              <th style="padding:8px 6px; text-align:left;">Discount (%)</th>
+              <th style="padding:8px 6px; text-align:right;">Line Total</th>
+              <th style="padding:8px 6px; text-align:center;">✕</th>
+            </tr>
+          </thead>
+          <tbody id="formset-body">
+            {% for form_item in formset %}
+            <tr class="line-item-row" {% if form_item.instance.pk %}data-existing="true"{% endif %}>
+              {% if form_item.instance.pk %}{{ form_item.id }}{% endif %}
+              <td style="padding:6px 4px;">
+                {{ form_item.product }}
+                {% if form_item.product.errors %}<span style="color:#e74c3c;font-size:11px;">{{ form_item.product.errors.0 }}</span>{% endif %}
+              </td>
+              <td style="padding:6px 4px;">
+                {{ form_item.unit_price }}
+                {% if form_item.unit_price.errors %}<span style="color:#e74c3c;font-size:11px;">{{ form_item.unit_price.errors.0 }}</span>{% endif %}
+              </td>
+              <td style="padding:6px 4px;">
+                {{ form_item.quantity }}
+                {% if form_item.quantity.errors %}<span style="color:#e74c3c;font-size:11px;">{{ form_item.quantity.errors.0 }}</span>{% endif %}
+              </td>
+              <td style="padding:6px 4px;">
+                {{ form_item.discount }}
+                {% if form_item.discount.errors %}<span style="color:#e74c3c;font-size:11px;">{{ form_item.discount.errors.0 }}</span>{% endif %}
+              </td>
+              <td style="padding:6px 4px; text-align:right; font-weight:bold;">
+                <span class="line-total">—</span>
+              </td>
+              <td style="padding:6px 4px; text-align:center;">
+                {{ form_item.DELETE }}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <!-- Add line item button removed per user request -->
+
+        <!-- ── Totals (display only – calculated server-side on save) ── -->
+        <div style="display:flex; justify-content:flex-end; margin-bottom:24px;">
+          <div style="min-width:280px; font-size:14px; border:1px solid #dee2e6; border-radius:6px; overflow:hidden;">
+            <div style="display:flex; justify-content:space-between; padding:8px 14px; border-bottom:1px solid #eee;">
+              <span>Subtotal</span><span id="preview-subtotal">—</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:8px 14px; border-bottom:1px solid #eee; color:#e74c3c;">
+              <span>Discount</span><span id="preview-discount">—</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:10px 14px; font-weight:bold; font-size:16px; background:#f8f9fa;">
+              <span>Total</span><span id="preview-total">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Action Buttons ── -->
+        <p style="font-size: 13px; color: #7f8c8d; font-style: italic; margin-bottom: 12px; text-align: right;">
+          *All prices are based on current market rates
+        </p>
+        <div class="btn-group">
+          <button type="submit" class="btn btn-primary" style="width:100%; font-size:16px; padding:12px;">Create Quote</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
 </div>
+
+<script>
+// ── Live totals preview (mirrors server-side Quote.get_total() logic) ────────────────
+function calcTotals() {
+  var netSubtotal = 0;  // Sum of each line's already-discounted total (mirrors get_subtotal())
+  document.querySelectorAll('.line-item-row').forEach(function(row) {
+    var del = row.querySelector('input[type=checkbox]');
+    if (del && del.checked) return;
+    var price = parseFloat(row.querySelector('input[id$="-unit_price"]')?.value) || 0;
+    var qty   = parseFloat(row.querySelector('input[id$="-quantity"]')?.value)   || 0;
+    var disc  = parseFloat(row.querySelector('input[id$="-discount"]')?.value)   || 0;
+    var base  = price * qty;
+    var lineTotal = base - (base * (disc / 100));  // per-line discount applied first
+    netSubtotal += lineTotal;
+    var span = row.querySelector('.line-total');
+    if (span) span.textContent = '$' + lineTotal.toFixed(2);
+  });
+  // Quote-level discount is applied to the net subtotal (after line discounts)
+  var qDisc    = parseFloat(document.querySelector('#id_discount')?.value) || 0;
+  var qDiscAmt = netSubtotal * (qDisc / 100);
+  var total    = netSubtotal - qDiscAmt;
+  document.getElementById('preview-subtotal').textContent  = '$' + netSubtotal.toFixed(2);
+  document.getElementById('preview-discount').textContent  = '-$' + qDiscAmt.toFixed(2);
+  document.getElementById('preview-total').textContent     = '$' + Math.max(0, total).toFixed(2);
+}
+document.getElementById('quote-form').addEventListener('input', calcTotals);
+calcTotals();
+
+
+</script>
 {% endblock %}

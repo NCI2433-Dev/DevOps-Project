@@ -1,16 +1,16 @@
 {% extends "base.html" %}
-{% block title %}My Orders - CRM CPQ{% endblock %}
+{% block title %}My Orders - Raw Foods CPQ{% endblock %}
 
 {% block content %}
 <div class="card">
     <div class="card-header">
         <h1>My Orders & Quotes</h1>
         <p style="color: #666; font-size: 14px; margin-top: 5px;">
-            Track the status of your product quotes and orders.
+            Track the status of your food product quotes and orders.
         </p>
     </div>
     <div class="card-body">
-        
+
         <!-- Order Summary -->
         <div style="margin-bottom: 30px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
@@ -20,172 +20,250 @@
                 </div>
                 <div style="text-align: center;">
                     <div style="font-size: 28px; font-weight: bold; color: #27ae60;">
-                        {% widthratio quotes|length orders_count 100|floatformat:0 %}%
+                        {{ approved_count }}
                     </div>
                     <div style="color: #666; font-size: 14px;">Approved</div>
                 </div>
                 <div style="text-align: center;">
                     <div style="font-size: 28px; font-weight: bold; color: #f39c12;">
-                        {{ quotes|dictsort:"status"|length }}
+                        {{ in_progress_count }}
                     </div>
                     <div style="color: #666; font-size: 14px;">In Progress</div>
                 </div>
             </div>
         </div>
 
-        <!-- Quotes/Orders Table -->
+        <!-- Quotes / Orders Table -->
         {% if quotes %}
-            <h3 style="margin-top: 30px; margin-bottom: 15px;">Your Quotes</h3>
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="background-color: #f0f0f0; border-bottom: 2px solid #ddd;">
-                        <th style="padding: 12px; text-align: left; font-weight: bold;">Quote Number</th>
-                        <th style="padding: 12px; text-align: left; font-weight: bold;">Opportunity</th>
-                        <th style="padding: 12px; text-align: left; font-weight: bold;">Status</th>
-                        <th style="padding: 12px; text-align: left; font-weight: bold;">Amount</th>
-                        <th style="padding: 12px; text-align: left; font-weight: bold;">Date</th>
-                        <th style="padding: 12px; text-align: center; font-weight: bold;">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for quote in quotes %}
-                        <tr style="border-bottom: 1px solid #eee;">
-                            <td style="padding: 12px;">
-                                <strong>{{ quote.number }}</strong>
-                            </td>
-                            <td style="padding: 12px;">{{ quote.opportunity.name }}</td>
-                            <td style="padding: 12px;">
-                                {% if quote.status == 'Approved' %}
-                                    <span style="padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; background-color: #d4edda; color: #155724;">
-                                        {{ quote.status }}
-                                    </span>
-                                {% elif quote.status == 'Submitted' %}
-                                    <span style="padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; background-color: #cfe2ff; color: #084298;">
-                                        {{ quote.status }}
-                                    </span>
-                                {% elif quote.status == 'Draft' %}
-                                    <span style="padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; background-color: #fff3cd; color: #664d03;">
-                                        {{ quote.status }}
-                                    </span>
-                                {% elif quote.status == 'Rejected' %}
-                                    <span style="padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; background-color: #f8d7da; color: #842029;">
-                                        {{ quote.status }}
-                                    </span>
-                                {% else %}
-                                    <span style="padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; background-color: #e2e3e5; color: #383d41;">
-                                        {{ quote.status }}
-                                    </span>
-                                {% endif %}
-                            </td>
-                            <td style="padding: 12px;">
-                                <strong>${{ quote.get_total|floatformat:2 }}</strong>
-                            </td>
-                            <td style="padding: 12px;">{{ quote.created_at|date:"M d, Y" }}</td>
-                            <td style="padding: 12px; text-align: center;">
-                                <a href="{% url 'quote_detail' quote.id %}" style="color: #3498db; text-decoration: none; font-weight: bold;">
-                                    View Details
-                                </a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <div style="text-align: center; padding: 40px; background-color: #f8f9fa; border-radius: 5px;">
-                <p style="font-size: 16px; color: #666;">No quotes or orders yet.</p>
-                <p style="font-size: 14px; color: #999; margin-top: 10px;">
-                    <a href="{% url 'request_quote' %}" style="color: #3498db;">Request a quote</a> to get started.
-                </p>
+        <h3 style="margin-top:30px; margin-bottom:15px;">Your Quotes</h3>
+        {% for quote in quotes %}
+        <div style="border:1px solid #ddd; border-radius:8px; margin-bottom:20px; overflow:hidden;">
+
+            <!-- Quote Header -->
+            <div
+                style="display:flex; justify-content:space-between; align-items:center;
+                            padding:12px 18px;
+                            background:{% if quote.status == 'Approved' %}#d4edda{% elif quote.status == 'Submitted' %}#cfe2ff{% elif quote.status == 'Rejected' %}#f8d7da{% else %}#fff3cd{% endif %};">
+                <div>
+                    <strong style="font-size:16px;">{{ quote.number }}</strong>
+                    <span style="margin-left:12px; font-size:13px; color:#555;">{{ quote.opportunity.name }}</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <span style="font-size:13px; color:#555;">{{ quote.created_at|date:"M d, Y" }}</span>
+                    <span style="padding:4px 12px; border-radius:20px; font-size:12px; font-weight:bold;
+                                     background:{% if quote.status == 'Approved' %}#27ae60{% elif quote.status == 'Submitted' %}#3498db{% elif quote.status == 'Rejected' %}#e74c3c{% else %}#f39c12{% endif %};
+                                     color:white;">
+                        {{ quote.status }}
+                    </span>
+                </div>
             </div>
-        {% endif %}
 
-        <!-- Product Details & Payment Section -->
-        {% if leads %}
-            <h3 style="margin-top: 30px; margin-bottom: 15px;">Quote Requests</h3>
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="background-color: #f0f0f0; border-bottom: 2px solid #ddd;">
-                        <th style="padding: 12px; text-align: left; font-weight: bold;">Reference #</th>
-                        <th style="padding: 12px; text-align: left; font-weight: bold;">Product</th>
-                        <th style="padding: 12px; text-align: left; font-weight: bold;">Quantity</th>
-                        <th style="padding: 12px; text-align: left; font-weight: bold;">Status</th>
-                        <th style="padding: 12px; text-align: left; font-weight: bold;">Requested Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for lead in leads %}
-                        {% if lead.product_interested %}
-                            <tr style="border-bottom: 1px solid #eee;">
-                                <td style="padding: 12px;"><strong>{{ lead.reference_number }}</strong></td>
-                                <td style="padding: 12px;">{{ lead.product_interested.name }}</td>
-                                <td style="padding: 12px;">{{ lead.quantity }}</td>
-                                <td style="padding: 12px;">
-                                    {% if lead.status == 'Converted' %}
-                                        <span style="padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; background-color: #d4edda; color: #155724;">
-                                            {{ lead.status }}
-                                        </span>
-                                    {% elif lead.status == 'Qualified' %}
-                                        <span style="padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; background-color: #cfe2ff; color: #084298;">
-                                            {{ lead.status }}
-                                        </span>
-                                    {% elif lead.status == 'New' %}
-                                        <span style="padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; background-color: #fff3cd; color: #664d03;">
-                                            {{ lead.status }}
-                                        </span>
-                                    {% else %}
-                                        <span style="padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; background-color: #e2e3e5; color: #383d41;">
-                                            {{ lead.status }}
-                                        </span>
-                                    {% endif %}
-                                </td>
-                                <td style="padding: 12px;">{{ lead.created_at|date:"M d, Y" }}</td>
-                            </tr>
-                        {% endif %}
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% endif %}
-
-        <!-- Payment Section -->
-        <div style="margin-top: 40px; padding: 20px; background-color: #f0f7ff; border-left: 4px solid #3498db; border-radius: 5px;">
-            <h3 style="margin-top: 0; color: #084298;">Payment Information</h3>
-            
-            {% if quotes %}
-                <div style="margin-top: 15px;">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 15px;">
-                        {% for quote in quotes %}
-                            {% if quote.status == 'Approved' %}
-                                <div style="padding: 15px; background-color: white; border: 1px solid #ddd; border-radius: 5px;">
-                                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Quote {{ quote.number }}</div>
-                                    <div style="font-size: 18px; font-weight: bold; color: #084298;">
-                                        ${{ quote.get_total|floatformat:2 }}
-                                    </div>
-                                    <div style="font-size: 12px; color: #999; margin-top: 8px;">
-                                        Status: <strong style="color: #27ae60;">Ready for Payment</strong>
-                                    </div>
-                                    <button style="
-                                        margin-top: 10px;
-                                        padding: 8px 15px;
-                                        background-color: #27ae60;
-                                        color: white;
-                                        border: none;
-                                        border-radius: 3px;
-                                        cursor: pointer;
-                                        font-weight: bold;
-                                    " onclick="alert('Payment processing coming soon!')">
-                                        Process Payment
-                                    </button>
-                                </div>
-                            {% endif %}
+            <!-- Line Items Breakdown -->
+            <div style="padding:15px 18px;">
+                {% if quote.line_items.all %}
+                <table style="width:100%; border-collapse:collapse; font-size:14px; margin-bottom:10px;">
+                    <thead>
+                        <tr style="background:#f8f9fa; border-bottom:2px solid #dee2e6;">
+                            <th style="padding:8px 10px; text-align:left;">Product</th>
+                            <th style="padding:8px 10px; text-align:center;">Qty</th>
+                            <th style="padding:8px 10px; text-align:right;">Unit Price</th>
+                            <th style="padding:8px 10px; text-align:right;">Discount</th>
+                            <th style="padding:8px 10px; text-align:right;">Line Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in quote.line_items.all %}
+                        <tr style="border-bottom:1px solid #eee;">
+                            <td style="padding:8px 10px;">{{ item.product.name }}</td>
+                            <td style="padding:8px 10px; text-align:center;">{{ item.quantity }}</td>
+                            <td style="padding:8px 10px; text-align:right;">${{ item.unit_price|floatformat:2 }}</td>
+                            <td style="padding:8px 10px; text-align:right; color:#e74c3c;">
+                                {% if item.discount > 0 %}-{{ item.discount }}%{% else %}—{% endif %}
+                            </td>
+                            <td style="padding:8px 10px; text-align:right; font-weight:bold;">${{ item.get_line_total|floatformat:2 }}</td>
+                        </tr>
                         {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+
+                <!-- Summary totals -->
+                <div style="display:flex; justify-content:flex-end;">
+                    <div style="min-width:260px; font-size:14px;">
+                        <div
+                            style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #eee;">
+                            <span>Subtotal</span>
+                            <span>${{ quote.get_subtotal|floatformat:2 }}</span>
+                        </div>
+                        {% if quote.discount > 0 %}
+                        <div
+                            style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #eee; color:#e74c3c;">
+                            <span>Discount ({{ quote.discount }}%)</span>
+                            <span>-${{ quote.get_discount_amount|floatformat:2 }}</span>
+                        </div>
+                        {% endif %}
+                        <div
+                            style="display:flex; justify-content:space-between; padding:8px 0; font-size:16px; font-weight:bold; color:#2c3e50;">
+                            <span>Total</span>
+                            <span>${{ quote.get_total|floatformat:2 }}</span>
+                        </div>
                     </div>
                 </div>
-            {% else %}
-                <p style="color: #666; margin: 0;">
-                    No approved quotes ready for payment. Once your quote is approved, payment options will appear here.
-                </p>
-            {% endif %}
+
+                <!-- Payment button for approved quotes -->
+                {% if quote.status == 'Approved' %}
+                <div
+                    style="margin-top:15px; padding:12px; background:#eafaf1; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="color:#1e8449; font-weight:bold;">✅ Quote Approved — Ready for Payment</span>
+                    <form action="{% url 'create_checkout_session' quote.id %}" method="POST" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit"
+                            style="padding:8px 20px; background:#27ae60; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">
+                            Process Payment
+                        </button>
+                    </form>
+                </div>
+                {% elif quote.status == 'Paid' %}
+                <div
+                    style="margin-top:15px; padding:12px; background:#eafaf1; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="color:#1e8449; font-weight:bold;">🎉 Payment Received</span>
+                </div>
+                {% elif quote.status == 'Submitted' %}
+                <div
+                    style="margin-top:10px; padding:10px; background:#cfe2ff; border-radius:6px; color:#084298; font-size:13px;">
+                    ⏳ Your quote is under review. You'll see the final price once it's approved.
+                </div>
+                {% elif quote.status == 'Rejected' %}
+                <div
+                    style="margin-top:10px; padding:10px; background:#f8d7da; border-radius:6px; color:#842029; font-size:13px;">
+                    ❌ This quote was not approved. Please <a href="{% url 'request_quote' %}">submit a new request</a>.
+                </div>
+                {% endif %}
+            </div>
         </div>
+        {% endfor %}
+        {% else %}
+        <div style="text-align:center; padding:40px; background:#f8f9fa; border-radius:5px;">
+            <p style="font-size:16px; color:#666;">No quotes or orders yet.</p>
+            <p style="font-size:14px; color:#999; margin-top:10px;">
+                <a href="{% url 'request_quote' %}" style="color:#3498db;">Request a quote</a> to get started.
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- License Details & Payment Section -->
+        {% if leads %}
+        <h3 style="margin-top: 30px; margin-bottom: 15px;">Quote Requests</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background-color: #f0f0f0; border-bottom: 2px solid #ddd;">
+                    <th style="padding: 12px; text-align: left; font-weight: bold;">Reference #</th>
+                    <th style="padding: 12px; text-align: left; font-weight: bold;">Product</th>
+                    <th style="padding: 12px; text-align: left; font-weight: bold;">Quantity</th>
+                    <th style="padding: 12px; text-align: left; font-weight: bold;">Status</th>
+                    <th style="padding: 12px; text-align: left; font-weight: bold;">Requested Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lead in leads %}
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;"><strong>{{ lead.reference_number }}</strong></td>
+                    <td style="padding: 12px;">
+                        {% if lead.product_interested %}
+                        {{ lead.product_interested.name }}
+                        {% else %}
+                        <span style="color:#999; font-style:italic;">Not specified</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 12px;">{{ lead.quantity|default:"—" }}</td>
+                    <td style="padding: 12px;">
+                        {% if lead.status == 'Converted' %}
+                        <span
+                            style="padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; background-color: #d4edda; color: #155724;">
+                            {{ lead.status }}
+                        </span>
+                        {% elif lead.status == 'Qualified' %}
+                        <span
+                            style="padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; background-color: #cfe2ff; color: #084298;">
+                            {{ lead.status }}
+                        </span>
+                        {% elif lead.status == 'New' %}
+                        <span
+                            style="padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; background-color: #fff3cd; color: #664d03;">
+                            {{ lead.status }}
+                        </span>
+                        {% else %}
+                        <span
+                            style="padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; background-color: #e2e3e5; color: #383d41;">
+                            {{ lead.status }}
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 12px;">{{ lead.created_at|date:"M d, Y" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+        {% with approved_quotes=quotes|dictsortreversed:"status" %}
+        {% if quotes %}
+        {% for q in quotes %}{% if q.status == 'Approved' or q.status == 'Paid' %}{% with has_payment_quote=True %}{% endwith %}{% endif %}{% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {% comment %}Show Payment Information block only when there is at least one Approved or Paid quote{% endcomment %}
+        {% for quote in quotes %}{% if quote.status == 'Approved' or quote.status == 'Paid' %}
+        {% if forloop.first %}
+        <!-- Payment Section -->
+        <div
+            style="margin-top: 40px; padding: 20px; background-color: #f0f7ff; border-left: 4px solid #3498db; border-radius: 5px;">
+            <h3 style="margin-top: 0; color: #084298;">Payment Information</h3>
+
+
+            <div style="margin-top: 15px;">
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 15px;">
+                    {% for quote in quotes %}
+                    {% if quote.status == 'Approved' or quote.status == 'Paid' %}
+                    <div style="padding: 15px; background-color: white; border: 1px solid #ddd; border-radius: 5px;">
+                        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Quote {{ quote.number }}</div>
+                        <div style="font-size: 18px; font-weight: bold; color: #084298;">
+                            ${{ quote.get_total|floatformat:2 }}
+                        </div>
+                        <div style="font-size: 12px; color: #999; margin-top: 8px;">
+                            Status:
+                            {% if quote.status == 'Approved' %}
+                                <strong style="color: #27ae60;">Ready for Payment</strong>
+                            {% else %}
+                                <strong style="color: #3498db;">Paid</strong>
+                            {% endif %}
+                        </div>
+                        {% if quote.status == 'Approved' %}
+                        <form action="{% url 'create_checkout_session' quote.id %}" method="POST" style="margin: 0;">
+                            {% csrf_token %}
+                            <button type="submit" style="
+                                            margin-top: 10px;
+                                            padding: 8px 15px;
+                                            background-color: #27ae60;
+                                            color: white;
+                                            border: none;
+                                            border-radius: 3px;
+                                            cursor: pointer;
+                                            font-weight: bold;
+                                        ">
+                                Process Payment
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}{% endfor %}
 
     </div>
 </div>
@@ -194,7 +272,7 @@
     table {
         font-family: Arial, sans-serif;
     }
-    
+
     table tr:hover {
         background-color: #f9f9f9;
     }

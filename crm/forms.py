@@ -1,9 +1,7 @@
 """Forms for the CRM application."""
-import re
-
 from django import forms
-from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.core.exceptions import ValidationError
 from django.forms import inlineformset_factory
 from django.utils import timezone
@@ -23,9 +21,13 @@ class RequestQuoteForm(forms.ModelForm):
             }),
             'product_interested': forms.Select(attrs={'class': 'form-select'}),
             'quantity': forms.NumberInput(attrs={
-                'class': 'form-input', 'placeholder': 'Number of Products',
+                'class': 'form-input', 'placeholder': 'Qty (kg/tons/units)',
                 'type': 'number', 'min': '1'
             }),
+        }
+        labels = {
+            'product_interested': 'Food Product',
+            'quantity': 'Quantity (kg/tons/units)',
         }
 
     def clean_email(self):
@@ -81,10 +83,6 @@ class RegistrationForm(UserCreationForm):  # pylint: disable=too-many-ancestors
             raise ValidationError("This email is already registered.")
         return email
 
-    def save(self, commit=True):
-        """Save the user instance."""
-        user = super().save(commit=True)
-        return user
 
 
 class LeadForm(forms.ModelForm):
@@ -92,55 +90,37 @@ class LeadForm(forms.ModelForm):
     class Meta:  # pylint: disable=too-few-public-methods
         """Metadata for LeadForm."""
         model = Lead
-        fields = [
-            'first_name', 'last_name', 'email', 'phone',
-            'company_name', 'status', 'source', 'notes'
-        ]
+        fields = ['email', 'company_name', 'status']
         widgets = {
-            'first_name': forms.TextInput(attrs={'class': 'form-input'}),
-            'last_name': forms.TextInput(attrs={'class': 'form-input'}),
             'email': forms.EmailInput(attrs={'class': 'form-input'}),
-            'phone': forms.TextInput(attrs={'class': 'form-input'}),
             'company_name': forms.TextInput(attrs={'class': 'form-input'}),
             'status': forms.Select(attrs={'class': 'form-select'}),
-            'source': forms.Select(attrs={'class': 'form-select'}),
-            'notes': forms.Textarea(attrs={'class': 'form-textarea', 'rows': 4}),
         }
-
-    def clean_phone(self):
-        """Validate phone number format."""
-        phone = self.cleaned_data.get('phone')
-        pattern = r'^\+?\d{9,15}$'
-        if phone and not re.match(pattern, phone):
-            raise ValidationError("Enter a valid phone number (9-15 digits).")
-        return phone
+        labels = {
+            'company_name': 'Company / Restaurant Name',
+        }
 
 
 class AccountForm(forms.ModelForm):
     """Account form for lead conversion"""
+    opportunity_notes = forms.CharField(
+        required=False,
+        label='Opportunity Notes',
+        widget=forms.Textarea(attrs={
+            'class': 'form-textarea',
+            'rows': 3,
+            'placeholder': 'E.g. delivery requirements, preferred schedule, product quantities…'
+        })
+    )
+
     class Meta:  # pylint: disable=too-few-public-methods
         """Metadata for AccountForm."""
         model = Account
-        fields = [
-            'company_name', 'industry', 'contact_person_name',
-            'email', 'phone', 'address'
-        ]
+        fields = ['company_name', 'email']
         widgets = {
             'company_name': forms.TextInput(attrs={'class': 'form-input'}),
-            'industry': forms.TextInput(attrs={'class': 'form-input'}),
-            'contact_person_name': forms.TextInput(attrs={'class': 'form-input'}),
             'email': forms.EmailInput(attrs={'class': 'form-input'}),
-            'phone': forms.TextInput(attrs={'class': 'form-input'}),
-            'address': forms.Textarea(attrs={'class': 'form-textarea', 'rows': 3}),
         }
-
-    def clean_phone(self):
-        """Validate phone number format."""
-        phone = self.cleaned_data.get('phone')
-        pattern = r'^\+?\d{9,15}$'
-        if phone and not re.match(pattern, phone):
-            raise ValidationError("Enter a valid phone number (9-15 digits).")
-        return phone
 
 
 class OpportunityForm(forms.ModelForm):
@@ -158,6 +138,9 @@ class OpportunityForm(forms.ModelForm):
             'status': forms.Select(attrs={'class': 'form-select'}),
             'stage': forms.Select(attrs={'class': 'form-select'}),
             'expected_close_date': forms.DateInput(attrs={'class': 'form-input', 'type': 'date'}),
+        }
+        labels = {
+            'name': 'Deal Name (e.g. March Poultry Supply)',
         }
 
     def clean_expected_close_date(self):
@@ -177,9 +160,14 @@ class QuoteForm(forms.ModelForm):
         widgets = {
             'opportunity': forms.Select(attrs={'class': 'form-select'}),
             'discount': forms.NumberInput(attrs={
-                'class': 'form-input', 'min': '0', 'max': '100', 'step': '0.01'
+                'class': 'form-input', 'min': '0', 'max': '100', 'step': '0.01',
+                'placeholder': '0'
             }),
-            'notes': forms.Textarea(attrs={'class': 'form-textarea', 'rows': 4}),
+            'notes': forms.Textarea(attrs={'class': 'form-textarea', 'rows': 3,
+                                            'placeholder': 'Internal notes (optional)'}),
+        }
+        labels = {
+            'opportunity': 'Linked Deal / Customer'
         }
 
     def clean_discount(self):
@@ -206,6 +194,24 @@ class QuoteLineItemForm(forms.ModelForm):
                 'class': 'form-input', 'min': '0', 'max': '100', 'step': '0.01'
             }),
         }
+        labels = {
+            'product': 'Food Product',
+            'quantity': 'Quantity (kg/tons/units)',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['product'].empty_label = None
+        
+        # Attempt to prefill unit_price if this is a new empty form
+        first_product = self.fields['product'].queryset.first()
+        if not self.initial.get('unit_price') and first_product:
+            self.initial['unit_price'] = first_product.base_price
+            
+        if not self.initial.get('quantity'):
+            self.initial['quantity'] = 1
+        if not self.initial.get('discount'):
+            self.initial['discount'] = 0
 
     def clean_quantity(self):
         """Ensure quantity is at least 1."""
@@ -227,6 +233,32 @@ QuoteLineItemFormSet = inlineformset_factory(
     Quote,
     QuoteLineItem,
     form=QuoteLineItemForm,
-    extra=3,
-    can_delete=True
+    extra=0,
+    can_delete=True,
+    min_num=1,
+    validate_min=True,
 )
+
+
+class CustomAuthForm(AuthenticationForm):
+    """Custom auth form that allows log in with username or email."""
+    def clean(self):
+        username = self.cleaned_data.get('username')
+        password = self.cleaned_data.get('password')
+
+        if username is not None and password:
+            user_model = get_user_model()
+            # If the value entered exists as an email, use their actual username
+            try:
+                user_match = user_model.objects.get(email__iexact=username)
+                username_to_auth = user_match.username
+            except (user_model.DoesNotExist, user_model.MultipleObjectsReturned):
+                username_to_auth = username
+
+            self.user_cache = authenticate(self.request, username=username_to_auth, password=password)
+            if self.user_cache is None:
+                raise self.get_invalid_login_error()
+            else:
+                self.confirm_login_allowed(self.user_cache)
+
+        return self.cleaned_data

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Request Quote - CRM CPQ{% endblock %}
+{% block title %}Request a Quote - CRM CPQ{% endblock %}
 
 {% block content %}
 <div style="max-width: 600px; margin: 20px auto;">
@@ -8,80 +8,89 @@
         <div class="card-header">
             <h1>Request a Quote</h1>
             <p style="color:#666; font-size:14px;">
-                Fill the form below and our sales team will contact you.
+                {% if user.is_authenticated %}
+                Select the Raw Food and quantity you're interested in and we'll get back to you shortly.
+                {% else %}
+                Fill in the form below to request a Raw Food. Our team will contact you.
+                {% endif %}
             </p>
         </div>
 
         <div class="card-body">
+
+            {% if user.is_authenticated %}
+            <!-- Authenticated user info banner -->
+            <div
+                style="background-color:#e8f4fd; border-left:4px solid #3498db; padding:12px 15px; border-radius:4px; margin-bottom:20px; font-size:14px; color:#2c3e50;">
+                Submitting as <strong>{{ user.username }}</strong>
+                &nbsp;·&nbsp; <strong>{{ user.email }}</strong>
+                &nbsp;·&nbsp; Your request will appear in <a href="{% url 'my_orders' %}" style="color:#2980b9;">My
+                    Orders</a> instantly.
+            </div>
+            {% endif %}
+
             <form method="post">
                 {% csrf_token %}
 
                 {% if form.non_field_errors %}
-                    <div class="alert alert-error">
-                        {{ form.non_field_errors }}
-                    </div>
+                <div class="alert alert-error">
+                    {{ form.non_field_errors }}
+                </div>
                 {% endif %}
 
-  
-            {% if user.is_authenticated %}
+                <!-- License field — shown for all users -->
                 <div class="form-group">
                     <label for="{{ form.product_interested.id_for_label }}">{{ form.product_interested.label }}</label>
                     {{ form.product_interested }}
                     {% if form.product_interested.errors %}
-                        <span style="color:#e74c3c; font-size:12px;">
-                            {{ form.product_interested.errors.0 }}
-                        </span>
+                    <span style="color:#e74c3c; font-size:12px;">
+                        {{ form.product_interested.errors.0 }}
+                    </span>
                     {% endif %}
                 </div>
 
+                <!-- Quantity field — shown for all users -->
                 <div class="form-group">
                     <label for="{{ form.quantity.id_for_label }}">{{ form.quantity.label }}</label>
                     {{ form.quantity }}
                     {% if form.quantity.errors %}
-                        <span style="color:#e74c3c; font-size:12px;">
-                            {{ form.quantity.errors.0 }}
-                        </span>
-                    {% endif %}
-                </div>
-            {% else %}
-                <div class="form-group">
-                    <label for="{{ form.product_interested.id_for_label }}">{{ form.product_interested.label }}</label>
-                    {{ form.product_interested }}
-                    {% if form.product_interested.errors %}
-                        <span style="color:#e74c3c; font-size:12px;">
-                            {{ form.product_interested.errors.0 }}
-                        </span>
+                    <span style="color:#e74c3c; font-size:12px;">
+                        {{ form.quantity.errors.0 }}
+                    </span>
                     {% endif %}
                 </div>
 
+                {% if user.is_authenticated %}
+                <!-- Notes field for logged-in users -->
                 <div class="form-group">
-                    <label for="{{ form.quantity.id_for_label }}">{{ form.quantity.label }}</label>
-                    {{ form.quantity }}
-                    {% if form.quantity.errors %}
-                        <span style="color:#e74c3c; font-size:12px;">
-                            {{ form.quantity.errors.0 }}
-                        </span>
-                    {% endif %}
+                    <label for="id_notes">Additional Notes <span
+                            style="color:#999; font-weight:normal;">(optional)</span></label>
+                    <textarea name="notes" id="id_notes" rows="3" class="form-input" style="resize:vertical;"
+                        placeholder="E.g. preferred delivery date, special configuration, questions for the sales team…"></textarea>
                 </div>
+                {% else %}
+                <!-- Email field — only for guests -->
                 <div class="form-group">
-                    <label for="{{ form.email.id_for_label }}">{{ form.email.label}}</label>
+                    <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
                     {{ form.email }}
                     {% if form.email.errors %}
-                        <span style="color:#e74c3c; font-size:12px;">
-                            {{ form.email.errors.0 }}
-                        </span>
+                    <span style="color:#e74c3c; font-size:12px;">
+                        {{ form.email.errors.0 }}
+                    </span>
                     {% endif %}
                 </div>
-            {% endif %}    
+                {% endif %}
 
                 <div class="btn-group">
                     <button type="submit" class="btn btn-success">
                         Submit Request
                     </button>
 
-                    <a href="{% url 'home' %}" class="btn btn-secondary">
-                        Cancel
-                    </a>
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'my_orders' %}" class="btn btn-secondary">Cancel</a>
+                    {% else %}
+                    <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
+                    {% endif %}
                 </div>
 
             </form>

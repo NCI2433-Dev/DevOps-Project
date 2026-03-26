@@ -5,15 +5,15 @@
 <div style="width: 95%; max-width: 1000px; margin: 20px auto;">
     <div class="card">
         <div class="card-header">
-            <h1>Quote {{ quote.number }}</h1>
+            <h1>Supply Quote {{ quote.number }}</h1>
             <p style="font-size: 14px; color: #7f8c8d; margin: 0;">
-                Opportunity: <strong>{{ quote.opportunity.name }}</strong>
+                Supply Deal: <strong>{{ quote.opportunity.name }}</strong>
             </p>
         </div>
         
         <div class="card-body detail-items">
             <div class="detail-item">
-                <span class="label">Opportunity Account:</span>
+                <span class="label">Supply Deal Account:</span>
                 <span class="value">{{ quote.opportunity.account.company_name }}</span>
             </div>
             <div class="detail-item">
@@ -46,20 +46,20 @@
             <h2>Line Items</h2>
         </div>
         <div class="card-body">
-            {% if quote.quotelineitem_set.all %}
+            {% if quote.line_items.all %}
                 <table>
                     <thead>
                         <tr>
-                            <th>Product</th>
+                            <th>Food Product</th>
                             <th>SKU</th>
-                            <th>Unit Price</th>
-                            <th>Quantity</th>
+                            <th>Unit Price ($)</th>
+                            <th>Quantity (kg/tons)</th>
                             <th>Discount (%)</th>
                             <th>Line Total</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for line in quote.quotelineitem_set.all %}
+                        {% for line in quote.line_items.all %}
                             <tr>
                                 <td>{{ line.product.name }}</td>
                                 <td>{{ line.product.sku }}</td>

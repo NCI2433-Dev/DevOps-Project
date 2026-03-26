@@ -9,23 +9,18 @@
             Account: <strong>{{ opportunity.account.company_name }}</strong>
         </p>
     </div>
+
+    <!-- Flow indicator -->
+    <div style="background:#f8f9fa; padding:10px 20px; font-size:13px; color:#666; border-bottom:1px solid #eee; display:flex; align-items:center; gap:8px;">
+        <span>📋 Inquiry</span> <span>→</span>
+        <strong style="color:#3498db;">🤝 Supply Deal</strong> <span>→</span>
+        <span>📄 Supply Quote</span>
+    </div>
     
     <div class="card-body detail-items">
         <div class="detail-item">
-            <span class="label">Account Contact:</span>
-            <span class="value">{{ opportunity.account.contact_person_name }}</span>
-        </div>
-        <div class="detail-item">
-            <span class="label">Email:</span>
+            <span class="label">Account Contact Email:</span>
             <span class="value">{{ opportunity.account.email }}</span>
-        </div>
-        <div class="detail-item">
-            <span class="label">Phone:</span>
-            <span class="value">{{ opportunity.account.phone }}</span>
-        </div>
-        <div class="detail-item">
-            <span class="label">Industry:</span>
-            <span class="value">{{ opportunity.account.industry }}</span>
         </div>
         <div class="detail-item">
             <span class="label">Stage:</span>
@@ -40,9 +35,9 @@
             <span class="value">{{ opportunity.expected_close_date|date:"M d, Y" }}</span>
         </div>
         {% if opportunity.description %}
-            <div class="detail-item">
-                <span class="label">Description:</span>
-                <span class="value">{{ opportunity.description }}</span>
+            <div style="margin-top: 20px; padding: 15px; background: #fdfbf7; border-left: 4px solid #f39c12; border-radius: 4px;">
+                <h4 style="margin: 0 0 8px 0; color: #d35400; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Deal Notes & Requirements</h4>
+                <p style="margin: 0; color: #2c3e50; line-height: 1.5; font-size: 15px;">{{ opportunity.description|linebreaksbr }}</p>
             </div>
         {% endif %}
         <div class="detail-item">
@@ -55,7 +50,7 @@
 <div style="margin-top: 20px;">
     <div class="card">
         <div class="card-header">
-            <h2>Quotes</h2>
+            <h2>Supply Quotes</h2>
         </div>
         <div class="card-body">
             {% if quotes %}
@@ -84,13 +79,15 @@
                     </tbody>
                 </table>
             {% else %}
-                <p>No quotes yet. <a href="{% url 'quote_create' %}">Create one</a></p>
+                <p style="color:#666;">No supply quotes yet.</p>
+                <a href="{% url 'opportunity_create_quote' opportunity.id %}" class="btn btn-success">+ Create Supply Quote</a>
             {% endif %}
         </div>
     </div>
 </div>
 
 <div class="btn-group" style="margin-top: 20px; justify-content: center;">
+    <a href="{% url 'opportunity_create_quote' opportunity.id %}" class="btn btn-success" style="font-size:15px;">📄 Create Supply Quote</a>
     <a href="{% url 'opportunity_update' opportunity.id %}" class="btn btn-warning">Edit</a>
     <a href="{% url 'opportunity_delete' opportunity.id %}" class="btn btn-danger">Delete</a>
     <a href="{% url 'opportunity_list' %}" class="btn btn-secondary">Back to List</a>
