@@ -30,7 +30,15 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'fallback-key-for-local-dev-only')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = [
+    "34c2152fcd1f44c09d4377301a24d269.vfs.cloud9.us-east-1.amazonaws.com",
+    "localhost",
+    "127.0.0.1",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://34c2152fcd1f44c09d4377301a24d269.vfs.cloud9.us-east-1.amazonaws.com"
+]
 
 
 # Application definition

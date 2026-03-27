@@ -88,4 +88,4 @@ jobs:
             --exclude ".env"
       - name: Deploy to Elastic Beanstalk
         run: |
-          eb deploy CPQAPP-env-new --staged
+          eb deploy Test1-env-2 --staged
