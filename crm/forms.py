@@ -5,7 +5,6 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.core.exceptions import ValidationError
 from django.forms import inlineformset_factory
 from django.utils import timezone
-
 from .models import Account, Lead, Opportunity, Quote, QuoteLineItem
 
 
@@ -17,12 +16,17 @@ class RequestQuoteForm(forms.ModelForm):
         fields = ['email', 'product_interested', 'quantity']
         widgets = {
             'email': forms.EmailInput(attrs={
-                'class': 'form-input', 'placeholder': 'Email Address'
+                'class': 'form-input',
+                'placeholder': 'Email Address'
             }),
-            'product_interested': forms.Select(attrs={'class': 'form-select'}),
+            'product_interested': forms.Select(attrs={
+                'class': 'form-select'}),
+
             'quantity': forms.NumberInput(attrs={
-                'class': 'form-input', 'placeholder': 'Qty (kg/tons/units)',
-                'type': 'number', 'min': '1'
+                'class': 'form-input',
+                'placeholder': 'Qty (kg/tons/units)',
+                'type': 'number', 
+                'min': '1'
             }),
         }
         labels = {
@@ -198,16 +202,13 @@ class QuoteLineItemForm(forms.ModelForm):
             'product': 'Food Product',
             'quantity': 'Quantity (kg/tons/units)',
         }
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['product'].empty_label = None
-        
         # Attempt to prefill unit_price if this is a new empty form
         first_product = self.fields['product'].queryset.first()
         if not self.initial.get('unit_price') and first_product:
             self.initial['unit_price'] = first_product.base_price
-            
         if not self.initial.get('quantity'):
             self.initial['quantity'] = 1
         if not self.initial.get('discount'):
@@ -252,13 +253,12 @@ class CustomAuthForm(AuthenticationForm):
             try:
                 user_match = user_model.objects.get(email__iexact=username)
                 username_to_auth = user_match.username
-            except (user_model.DoesNotExist, user_model.MultipleObjectsReturned):
+            except(user_model.DoesNotExist,user_model.MultipleObjectsReturned):
                 username_to_auth = username
-
-            self.user_cache = authenticate(self.request, username=username_to_auth, password=password)
+            self.user_cache = authenticate(self.request,
+            username=username_to_auth, password=password)
             if self.user_cache is None:
                 raise self.get_invalid_login_error()
             else:
                 self.confirm_login_allowed(self.user_cache)
-
         return self.cleaned_data

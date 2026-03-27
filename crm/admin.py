@@ -1,8 +1,7 @@
 """Admin configuration for the CRM application."""
 from django.contrib import admin
-
-from .models import Account, Lead, Opportunity, Product, Quote, QuoteLineItem
 from django.contrib.auth.models import Group
+from .models import Account, Lead, Opportunity, Product, Quote, QuoteLineItem
 
 # Unregister the default Group model from the admin interface
 admin.site.unregister(Group)

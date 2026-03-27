@@ -192,7 +192,6 @@ class Quote(models.Model):
         subtotal = self.get_subtotal()
         discount_amount = self.get_discount_amount()
         return round(subtotal - discount_amount, 2)
-        
     def recalculate_totals(self):
         """Strict backend recalculation of totals. (Returns nothing, logic is in the getters)
         This is a placeholder method to satisfy the business logic requirement, since Django DB
