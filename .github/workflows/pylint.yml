@@ -92,8 +92,8 @@ jobs:
       - name: Deploy to Elastic Beanstalk
         uses: aws-actions/aws-elasticbeanstalk-deploy@v1.0.0
         with:
+          region: us-east-1
           application_name: "test1"
           environment_name: "Test1-env-2"
           version_label: github-${{ github.run_number }}
-          region: us-east-1
           deployment_package: deploy.zip
