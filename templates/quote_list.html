@@ -42,7 +42,7 @@
                             <td>{{ quote.number }}</td>
                             <td>{{ quote.opportunity.name }}</td>
                             <td><span class="badge badge-{{ quote.status|lower }}">{{ quote.status }}</span></td>
-                            <td>${{ quote.get_total|floatformat:2 }}</td>
+                            <td>€{{ quote.get_total|floatformat:2 }}</td>
                             <td>{{ quote.created_at|date:"M d, Y" }}</td>
                             <td class="table-actions">
                                 <a href="{% url 'quote_detail' quote.id %}" class="action-view">View</a>

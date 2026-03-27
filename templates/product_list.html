@@ -22,7 +22,7 @@
                 <tr>
                     <td>{{ product.name }}</td>
                     <td>{{ product.sku }}</td>
-                    <td>${{ product.base_price }}</td>
+                    <td>€{{ product.base_price }}</td>
                     <td class="table-actions">
                         <div style="display: flex; gap: 8px;">
                             <a href="{% url 'request_quote' %}?product_id={{ product.id }}" class="btn btn-success"

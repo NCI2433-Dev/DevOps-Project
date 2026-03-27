@@ -56,7 +56,7 @@
           <thead>
             <tr style="background:#f8f9fa; border-bottom:2px solid #dee2e6;">
               <th style="padding:8px 6px; text-align:left;">Food Product</th>
-              <th style="padding:8px 6px; text-align:left;">Unit Price ($)</th>
+              <th style="padding:8px 6px; text-align:left;">Unit Price (€)</th>
               <th style="padding:8px 6px; text-align:left;">Qty (kg/tons/units)</th>
               <th style="padding:8px 6px; text-align:left;">Discount (%)</th>
               <th style="padding:8px 6px; text-align:right;">Line Total</th>
@@ -138,15 +138,15 @@ function calcTotals() {
     var lineTotal = base - (base * (disc / 100));  // per-line discount applied first
     netSubtotal += lineTotal;
     var span = row.querySelector('.line-total');
-    if (span) span.textContent = '$' + lineTotal.toFixed(2);
+    if (span) span.textContent = '€' + lineTotal.toFixed(2);
   });
   // Quote-level discount is applied to the net subtotal (after line discounts)
   var qDisc    = parseFloat(document.querySelector('#id_discount')?.value) || 0;
   var qDiscAmt = netSubtotal * (qDisc / 100);
   var total    = netSubtotal - qDiscAmt;
-  document.getElementById('preview-subtotal').textContent  = '$' + netSubtotal.toFixed(2);
-  document.getElementById('preview-discount').textContent  = '-$' + qDiscAmt.toFixed(2);
-  document.getElementById('preview-total').textContent     = '$' + Math.max(0, total).toFixed(2);
+  document.getElementById('preview-subtotal').textContent  = '€' + netSubtotal.toFixed(2);
+  document.getElementById('preview-discount').textContent  = '-€' + qDiscAmt.toFixed(2);
+  document.getElementById('preview-total').textContent     = '€' + Math.max(0, total).toFixed(2);
 }
 document.getElementById('quote-form').addEventListener('input', calcTotals);
 calcTotals();

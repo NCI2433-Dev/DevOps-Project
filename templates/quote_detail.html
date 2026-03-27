@@ -52,7 +52,7 @@
                         <tr>
                             <th>Food Product</th>
                             <th>SKU</th>
-                            <th>Unit Price ($)</th>
+                            <th>Unit Price (€)</th>
                             <th>Quantity (kg/tons)</th>
                             <th>Discount (%)</th>
                             <th>Line Total</th>
@@ -63,10 +63,10 @@
                             <tr>
                                 <td>{{ line.product.name }}</td>
                                 <td>{{ line.product.sku }}</td>
-                                <td>${{ line.unit_price|floatformat:2 }}</td>
+                                <td>€{{ line.unit_price|floatformat:2 }}</td>
                                 <td>{{ line.quantity }}</td>
                                 <td>{{ line.discount }}%</td>
-                                <td>${{ line.get_line_total|floatformat:2 }}</td>
+                                <td>€{{ line.get_line_total|floatformat:2 }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -83,15 +83,15 @@
                 <div style="width: 300px;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #ecf0f1;">
                         <span>Subtotal:</span>
-                        <span>${{ quote.get_subtotal|floatformat:2 }}</span>
+                        <span>€{{ quote.get_subtotal|floatformat:2 }}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #ecf0f1;">
                         <span>Discount ({{ quote.discount }}%):</span>
-                        <span>${{ quote.get_discount_amount|floatformat:2 }}</span>
+                        <span>€{{ quote.get_discount_amount|floatformat:2 }}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; color: #2c3e50; padding: 10px 0;">
                         <span>Total:</span>
-                        <span>${{ quote.get_total|floatformat:2 }}</span>
+                        <span>€{{ quote.get_total|floatformat:2 }}</span>
                     </div>
                 </div>
             </div>
