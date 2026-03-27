@@ -197,7 +197,6 @@ class Quote(models.Model):
         This is a placeholder method to satisfy the business logic requirement, since Django DB
         design here calculates totals dynamically on the fly via get_subtotal() / get_total()
         rather than persisting them statically to DB fields to prevent async drift."""
-        pass
 
     def can_edit(self):
         """Check if quote can be edited"""

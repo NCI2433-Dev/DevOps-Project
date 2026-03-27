@@ -5,7 +5,7 @@ from . import views
 from .forms import RegistrationForm, CustomAuthForm
 
 
-class HomeRedirectLoginView(LoginView):
+class HomeRedirectLoginView(LoginView):  # pylint: disable=too-many-ancestors
     """Login view that always redirects to home after login, ignoring next."""
     template_name = 'login.html'
     form_class = CustomAuthForm
@@ -43,10 +43,22 @@ urlpatterns = [
 
     # Authenticated user views
     path('my-orders/', views.my_orders, name='my_orders'),
-    path('my-orders/pay/<int:quote_id>/', views.create_checkout_session, name='create_checkout_session'),
-    path('my-orders/pay/success/<int:quote_id>/', views.payment_success, name='payment_success'),
-    path('my-orders/pay/cancel/<int:quote_id>/', views.payment_cancel, name='payment_cancel'),
-    
+    path(
+        'my-orders/pay/<int:quote_id>/',
+        views.create_checkout_session,
+        name='create_checkout_session'
+    ),
+    path(
+        'my-orders/pay/success/<int:quote_id>/',
+        views.payment_success,
+        name='payment_success'
+    ),
+    path(
+        'my-orders/pay/cancel/<int:quote_id>/',
+        views.payment_cancel,
+        name='payment_cancel'
+    ),
+
     # Sales dashboard
     path('sales/', views.sales_dashboard, name='sales_dashboard'),
 
@@ -63,8 +75,16 @@ urlpatterns = [
     path('sales/opportunities/new/', views.opportunity_create, name='opportunity_create'),
     path('sales/opportunities/<int:pk>/', views.opportunity_detail, name='opportunity_detail'),
     path('sales/opportunities/<int:pk>/edit/', views.opportunity_update, name='opportunity_update'),
-    path('sales/opportunities/<int:pk>/delete/', views.opportunity_delete, name='opportunity_delete'),
-    path('sales/opportunities/<int:pk>/create-quote/', views.opportunity_create_quote, name='opportunity_create_quote'),
+    path(
+        'sales/opportunities/<int:pk>/delete/',
+        views.opportunity_delete,
+        name='opportunity_delete'
+    ),
+    path(
+        'sales/opportunities/<int:pk>/create-quote/',
+        views.opportunity_create_quote,
+        name='opportunity_create_quote'
+    ),
 
     # Quote URLs
     path('sales/quotes/', views.quote_list, name='quote_list'),
@@ -72,5 +92,9 @@ urlpatterns = [
     path('sales/quotes/<int:pk>/', views.quote_detail, name='quote_detail'),
     path('sales/quotes/<int:pk>/edit/', views.quote_update, name='quote_update'),
     path('sales/quotes/<int:pk>/delete/', views.quote_delete, name='quote_delete'),
-    path('sales/quotes/<int:pk>/update-status/', views.quote_update_status, name='quote_update_status'),
+    path(
+        'sales/quotes/<int:pk>/update-status/',
+        views.quote_update_status,
+        name='quote_update_status'
+    ),
 ]

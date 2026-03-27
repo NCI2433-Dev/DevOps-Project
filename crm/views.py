@@ -2,12 +2,16 @@
 
 from datetime import timedelta
 from functools import wraps
+
+import stripe
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 
 from .forms import (
@@ -21,10 +25,6 @@ from .forms import (
 )
 from .models import Account, Lead, Opportunity, Product, Quote
 
-import stripe
-from django.conf import settings
-from django.urls import reverse
-
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
@@ -32,7 +32,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 def create_checkout_session(request, quote_id):
     """Create Stripe Checkout Session for a quote."""
     quote = get_object_or_404(Quote, id=quote_id)
-    
+
     # Provide the standard Stripe checkout session config
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],
@@ -363,7 +363,7 @@ def lead_convert(request, pk):
 
 @login_required
 @staff_required
-def opportunity_create_quote(request, pk):
+def opportunity_create_quote(request, pk):  # pylint: disable=unused-argument
     """Shortcut: redirect to quote_create with the opportunity ID in the URL."""
     opp = get_object_or_404(Opportunity, id=pk)
     return redirect(reverse('quote_create', args=[opp.id]))
