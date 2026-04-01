@@ -34,6 +34,8 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    objects = models.Manager()
+
     class Meta:  # pylint: disable=too-few-public-methods
         """Metadata for Product model."""
         ordering = ['name']
@@ -76,6 +78,8 @@ class Lead(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    objects = models.Manager()
+
     class Meta:  # pylint: disable=too-few-public-methods
         """Metadata for Lead model."""
         ordering = ['-created_at']
@@ -96,6 +100,8 @@ class Account(models.Model):
     address = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = models.Manager()
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Metadata for Account model."""
@@ -129,6 +135,8 @@ class Opportunity(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    objects = models.Manager()
+
     class Meta:  # pylint: disable=too-few-public-methods
         """Metadata for Opportunity model."""
         ordering = ['-created_at']
@@ -157,6 +165,8 @@ class Quote(models.Model):
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = models.Manager()
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Metadata for Quote model."""
@@ -207,6 +217,8 @@ class QuoteLineItem(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = models.Manager()
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Metadata for QuoteLineItem model."""

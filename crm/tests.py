@@ -1,13 +1,15 @@
 """Tests for the CRM application."""
+from datetime import timedelta
+
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils import timezone
-from datetime import timedelta
+
 from .models import Product, Lead, Account, Opportunity, Quote, QuoteLineItem
 from .forms import (
-    RequestQuoteForm, RegistrationForm, LeadForm, AccountForm,
-    OpportunityForm, QuoteForm, QuoteLineItemForm
+    RequestQuoteForm, RegistrationForm, LeadForm,
+    OpportunityForm, QuoteForm
 )
 
 

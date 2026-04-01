@@ -148,7 +148,7 @@ def registration(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            form.save()
             messages.success(request, 'Registration successful! Please log in.')
             return redirect('login')
         for field, errors in form.errors.items():
