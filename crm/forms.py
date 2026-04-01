@@ -253,7 +253,7 @@ class CustomAuthForm(AuthenticationForm):
             try:
                 user_match = user_model.objects.get(email__iexact=username)
                 username_to_auth = user_match.username
-            except(user_model.DoesNotExist,user_model.MultipleObjectsReturned):
+            except (user_model.DoesNotExist, user_model.MultipleObjectsReturned):
                 username_to_auth = username
             self.user_cache = authenticate(self.request,
             username=username_to_auth, password=password)

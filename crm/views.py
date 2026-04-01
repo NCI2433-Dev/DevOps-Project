@@ -150,7 +150,7 @@ def registration(request):
         if form.is_valid():
             user = form.save()
             messages.success(request, 'Registration successful! Please log in.')
-            return redirect(f"/accounts/login/?username={user.username}")
+            return redirect('login')
         for field, errors in form.errors.items():
             for error in errors:
                 messages.error(request, f"{field}: {error}")
