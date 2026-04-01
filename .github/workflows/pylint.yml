@@ -117,6 +117,6 @@ jobs:
         with:
           aws-region: us-east-1
           application-name: "Raw foods"
-          environment-name: "Rawfoods-env-1"
+          environment-name: "Rawfoods-env-2"
           version-label: github-${{ github.run_number }}
           deployment-package-path: deploy.zip
