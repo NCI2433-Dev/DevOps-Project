@@ -93,7 +93,7 @@ jobs:
         uses: aws-actions/aws-elasticbeanstalk-deploy@v1.0.0
         with:
           aws-region: us-east-1
-          application-name: "test1"
-          environment-name: "Test1-env-2"
+          application-name: "Raw foods"
+          environment-name: "Rawfoods-env"
           version-label: github-${{ github.run_number }}
           deployment-package: deploy.zip

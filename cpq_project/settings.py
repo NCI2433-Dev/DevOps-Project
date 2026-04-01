@@ -28,9 +28,12 @@ load_dotenv(BASE_DIR / '.env')
 SECRET_KEY = os.environ.get('SECRET_KEY', 'fallback-key-for-local-dev-only')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = 'False'
+DEBUG = 'True'
 
-ALLOWED_HOSTS = [".elasticbeanstalk.com",]
+ALLOWED_HOSTS = [".elasticbeanstalk.com",
+                 "localhost",
+                 "127.0.0.1",
+                 ]
 
 
 # Application definition
