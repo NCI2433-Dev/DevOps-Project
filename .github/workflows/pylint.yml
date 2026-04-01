@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -27,14 +28,13 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          fi
+          pip install -r requirements.txt
           pip install pylint
 
       - name: Run pylint on crm package
         run: |
           pylint crm --ignore=migrations
+
 
   sonarqube:
     name: SonarQube
@@ -42,23 +42,28 @@ jobs:
     needs: lint
     permissions:
       contents: read
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          fi
+          pip install -r requirements.txt
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
 
   deploy:
     name: Deploy to Elastic Beanstalk
@@ -67,19 +72,10 @@ jobs:
     permissions:
       contents: read
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Create deployment package
-        run: |
-          zip -r deploy.zip . \
-            -x ".git/*" \
-            -x ".github/*" \
-            -x "__pycache__/*" \
-            -x "*.pyc" \
-            -x ".env" \
-            -x ".venv/*"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -96,4 +92,26 @@ jobs:
           application-name: "Raw foods"
           environment-name: "Rawfoods-env-1"
           version-label: github-${{ github.run_number }}
-          deployment-package: deploy.zip
+          deployment-package-path: .
+          exclude-patterns: |
+            .git/**
+            .github/**
+            venv/**
+            .venv/**
+            .venv_local/**
+            __pycache__/**
+            *.pyc
+            *.pyo
+            .env
+            *.env
+            db.sqlite3
+            staticfiles/**
+            .DS_Store
+            *.pem
+            *.log
+            .pytest_cache/**
+            .mypy_cache/**
+            .idea/**
+            .vscode/**
+            node_modules/**
+            deploy.zip
