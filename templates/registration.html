@@ -2,8 +2,8 @@
 {% block title %}Request Quote - CRM CPQ{% endblock %}
 
 {% block content %}
-<div style="max-width: 600px; margin: 20px auto;">
-    <div class="card">
+<div style="display: flex; justify-content: center; align-items: center; min-height: 80vh; padding: 40px 0;">
+    <div class="card" style="width: 100%; max-width: 600px; margin: 0;">
 
         <div class="card-header">
             <h1>Registration</h1>
@@ -13,32 +13,46 @@
         </div>
 
         <div class="card-body">
+
+            {% if prefill_email %}
+            <div
+                style="background-color:#e8f4fd; border-left:4px solid #3498db; padding:12px 15px; border-radius:4px; margin-bottom:20px; font-size:14px; color:#2c3e50;">
+                📧 We've pre-filled your email from your quote request. Use the same email to see your submitted quote
+                after you register.
+            </div>
+            {% endif %}
+
             <form method="post">
                 {% csrf_token %}
 
                 {% if form.non_field_errors %}
-                    <div class="alert alert-error">
-                        {{ form.non_field_errors }}
-                    </div>
+                <div class="alert alert-error">
+                    {{ form.non_field_errors }}
+                </div>
                 {% endif %}
 
                 <div class="form-group">
                     <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
                     {{ form.username }}
                     {% if form.username.errors %}
-                        <span style="color:#e74c3c; font-size:12px;">
-                            {{ form.username.errors.0 }}
-                        </span>
+                    <span style="color:#e74c3c; font-size:12px;">
+                        {{ form.username.errors.0 }}
+                    </span>
                     {% endif %}
                 </div>
 
                 <div class="form-group">
                     <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                    {% if prefill_email %}
+                    <input type="email" name="email" value="{{ prefill_email }}" class="form-input"
+                        id="{{ form.email.id_for_label }}" placeholder="Email Address">
+                    {% else %}
                     {{ form.email }}
+                    {% endif %}
                     {% if form.email.errors %}
-                        <span style="color:#e74c3c; font-size:12px;">
-                            {{ form.email.errors.0 }}
-                        </span>
+                    <span style="color:#e74c3c; font-size:12px;">
+                        {{ form.email.errors.0 }}
+                    </span>
                     {% endif %}
                 </div>
 
@@ -46,9 +60,9 @@
                     <label for="{{ form.company_name.id_for_label }}">{{ form.company_name.label }}</label>
                     {{ form.company_name }}
                     {% if form.company_name.errors %}
-                        <span style="color:#e74c3c; font-size:12px;">
-                            {{ form.company_name.errors.0 }}
-                        </span>
+                    <span style="color:#e74c3c; font-size:12px;">
+                        {{ form.company_name.errors.0 }}
+                    </span>
                     {% endif %}
                 </div>
 
@@ -56,9 +70,9 @@
                     <label for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
                     {{ form.password1 }}
                     {% if form.password1.errors %}
-                        <span style="color:#e74c3c; font-size:12px;">
-                            {{ form.password1.errors.0 }}
-                        </span>
+                    <span style="color:#e74c3c; font-size:12px;">
+                        {{ form.password1.errors.0 }}
+                    </span>
                     {% endif %}
                     <small style="color:#666; font-size:12px; display: block; margin-top: 5px;">
                         • Password must be at least 8 characters<br>
@@ -71,9 +85,9 @@
                     <label for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
                     {{ form.password2 }}
                     {% if form.password2.errors %}
-                        <span style="color:#e74c3c; font-size:12px;">
-                            {{ form.password2.errors.0 }}
-                        </span>
+                    <span style="color:#e74c3c; font-size:12px;">
+                        {{ form.password2.errors.0 }}
+                    </span>
                     {% endif %}
                 </div>
 

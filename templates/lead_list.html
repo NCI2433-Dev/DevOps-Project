@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Leads - CRM CPQ{% endblock %}
+{% block title %}Customer Inquiries - CRM CPQ{% endblock %}
 
 {% block content %}
 <div class="card">
     <div class="card-header">
-        <h1>Leads</h1>
+        <h1>Customer Inquiries</h1>
     </div>
     
     <div class="filter-section">
@@ -18,7 +18,7 @@
             </select>
         </div>
         <div style="flex: 1;"></div>
-        <a href="{% url 'lead_create' %}" class="btn btn-success">+ New Lead</a>
+        <a href="{% url 'lead_create' %}" class="btn btn-success">+ New Inquiry</a>
     </div>
     
     <div class="card-body">
@@ -27,9 +27,9 @@
                 <thead>
                     <tr>
                         <th>Reference #</th>
-                        <th>Name</th>
+
                         <th>Email</th>
-                        <th>Company</th>
+                        <th>Company / Restaurant</th>
                         <th>Status</th>
                         <th>Created</th>
                         <th>Actions</th>
@@ -39,7 +39,7 @@
                     {% for lead in leads %}
                         <tr>
                             <td>{{ lead.reference_number }}</td>
-                            <td>{{ lead.first_name }} {{ lead.last_name }}</td>
+
                             <td>{{ lead.email }}</td>
                             <td>{{ lead.company_name }}</td>
                             <td><span class="badge badge-{{ lead.status|lower }}">{{ lead.status }}</span></td>
@@ -47,14 +47,20 @@
                             <td class="table-actions">
                                 <a href="{% url 'lead_detail' lead.id %}" class="action-view">View</a>
                                 <a href="{% url 'lead_update' lead.id %}" class="action-edit">Edit</a>
-                                <a href="{% url 'lead_convert' lead.id %}" class="action-convert" {% if lead.status == 'Converted' %}style="opacity:0.5; pointer-events: none;"{% endif %}>Convert</a>
+                                {% if lead.status == 'Qualified' and not lead.converted_to_acct_id %}
+                                    <a href="{% url 'lead_convert' lead.id %}" class="action-convert">Convert to Opportunity</a>
+                                {% elif lead.converted_to_acct_id %}
+                                    <span style="color:#27ae60; font-size:12px; font-weight:bold;">✓ Converted</span>
+                                {% else %}
+                                    <span style="color:#aaa; font-size:12px;" title="Mark as Qualified to convert">Convert</span>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
         {% else %}
-            <p>No leads found.</p>
+            <p>No inquiries found.</p>
         {% endif %}
         
         {% if page_obj.has_other_pages %}

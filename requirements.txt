@@ -43,3 +43,5 @@ typing_extensions==4.15.0
 urllib3==1.26.20
 whitenoise==6.11.0
 zipp==3.23.0
+stripe==11.4.0
+

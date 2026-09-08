@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Opportunities - CRM CPQ{% endblock %}
+{% block title %}Supply Deals - CRM CPQ{% endblock %}
 
 {% block content %}
 <div class="card">
     <div class="card-header">
-        <h1>Opportunities</h1>
+        <h1>Supply Deals</h1>
     </div>
     
     <div class="filter-section">
@@ -27,7 +27,7 @@
             </select>
         </div>
         <div style="flex: 1;"></div>
-        <a href="{% url 'opportunity_create' %}" class="btn btn-success">+ New Opportunity</a>
+        <a href="{% url 'opportunity_create' %}" class="btn btn-success">+ New Supply Deal</a>
     </div>
     
     <div class="card-body">
@@ -35,7 +35,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Opportunity Name</th>
+                        <th>Deal Name</th>
                         <th>Account</th>
                         <th>Stage</th>
                         <th>Status</th>
@@ -54,13 +54,16 @@
                             <td class="table-actions">
                                 <a href="{% url 'opportunity_detail' opp.id %}" class="action-view">View</a>
                                 <a href="{% url 'opportunity_update' opp.id %}" class="action-edit">Edit</a>
+                                {% if opp.status == 'Open' %}
+                                    <a href="{% url 'opportunity_create_quote' opp.id %}" class="action-convert">Create Supply Quote</a>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
         {% else %}
-            <p>No opportunities found.</p>
+            <p>No supply deals found.</p>
         {% endif %}
         
         {% if page_obj.has_other_pages %}
