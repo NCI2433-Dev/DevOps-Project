@@ -14,26 +14,28 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
+# Load environment variables from .env for local development
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Load environment variables from .env file
-load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'fallback-key-for-local-dev-only')
+# SECURITY: require SECRET_KEY from environment (use .env for local dev)
+SECRET_KEY = os.environ.get('SECRET_KEY')
+if not SECRET_KEY:
+    raise RuntimeError(
+        'SECRET_KEY not set. Copy .env.example to .env and set SECRET_KEY before running.'
+    )
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG ='false'
+# DEBUG should be set via environment variable for safety (False by default)
+DEBUG = os.environ.get('DEBUG', 'False').lower() in ('1', 'true', 'yes')
 
-ALLOWED_HOSTS = [".elasticbeanstalk.com",
-                 "localhost",
-                 "127.0.0.1",
-                 ]
+# ALLOWED_HOSTS should be set via environment variable, comma-separated
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -138,7 +140,3 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
-
-# Stripe Payment Integration
-STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY', '')
-STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
