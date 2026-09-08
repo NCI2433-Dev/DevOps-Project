@@ -5,6 +5,14 @@ db.sqlite3
 staticfiles/
 .DS_Store
 
+# Python virtual environments
+venv/
+.venv/
+
+# Environment files
+.env
+.env.*
+
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml

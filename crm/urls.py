@@ -13,7 +13,7 @@ urlpatterns = [
     # Guest views
     path('', views.home, name='home'),
     path('products/', views.product_list, name='product_list'),
-    path('products/<int:id>/', views.product_detail, name='product_detail'),
+     path('products/<int:pk>/', views.product_detail, name='product_detail'),
     path('quote-request/', views.request_quote, name='request_quote'),
     path('registration/', views.registration, name='registration'),
     path('quote-request/success/<str:ref_num>/',
@@ -27,29 +27,29 @@ urlpatterns = [
     # Lead URLs
     path('sales/leads/', views.lead_list, name='lead_list'),
     path('sales/leads/new/', views.lead_create, name='lead_create'),
-    path('sales/leads/<int:id>/', views.lead_detail, name='lead_detail'),
-    path('sales/leads/<int:id>/edit/', views.lead_update, name='lead_update'),
-    path('sales/leads/<int:id>/delete/', views.lead_delete, name='lead_delete'),
-    path('sales/leads/<int:id>/convert/',
-         views.lead_convert, name='lead_convert'), # Removed trailing whitespace
+    path('sales/leads/<int:pk>/', views.lead_detail, name='lead_detail'),
+    path('sales/leads/<int:pk>/edit/', views.lead_update, name='lead_update'),
+    path('sales/leads/<int:pk>/delete/', views.lead_delete, name='lead_delete'),
+    path('sales/leads/<int:pk>/convert/',
+         views.lead_convert, name='lead_convert'),
 
     # Opportunity URLs
     path('sales/opportunities/', views.opportunity_list, name='opportunity_list'),
     path('sales/opportunities/new/',
          views.opportunity_create, name='opportunity_create'),
-    path('sales/opportunities/<int:id>/',
+    path('sales/opportunities/<int:pk>/',
          views.opportunity_detail, name='opportunity_detail'),
-    path('sales/opportunities/<int:id>/edit/',
+    path('sales/opportunities/<int:pk>/edit/',
          views.opportunity_update, name='opportunity_update'),
-    path('sales/opportunities/<int:id>/delete/',
+    path('sales/opportunities/<int:pk>/delete/',
          views.opportunity_delete, name='opportunity_delete'),
 
     # Quote URLs
     path('sales/quotes/', views.quote_list, name='quote_list'),
     path('sales/quotes/new/', views.quote_create, name='quote_create'),
-    path('sales/quotes/<int:id>/', views.quote_detail, name='quote_detail'),
-    path('sales/quotes/<int:id>/edit/', views.quote_update, name='quote_update'),
-    path('sales/quotes/<int:id>/delete/', views.quote_delete, name='quote_delete'),
-    path('sales/quotes/<int:id>/update-status/',
+    path('sales/quotes/<int:pk>/', views.quote_detail, name='quote_detail'),
+    path('sales/quotes/<int:pk>/edit/', views.quote_update, name='quote_update'),
+    path('sales/quotes/<int:pk>/delete/', views.quote_delete, name='quote_delete'),
+    path('sales/quotes/<int:pk>/update-status/',
          views.quote_update_status, name='quote_update_status'),
 ]
